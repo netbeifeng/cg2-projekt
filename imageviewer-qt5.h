@@ -47,7 +47,6 @@
 #endif
 
 #include "fstream"
-
 class QAction;
 class QLabel;
 class QMenu;
@@ -85,6 +84,7 @@ class ImageViewer : public QMainWindow
      // Beispiel für einen Algorithmus
      void applyExampleAlgorithm();
      void setSlider1Value(int);
+     void initDataTab2();
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
      void open();
@@ -118,6 +118,8 @@ protected:
     void plot(int x,int y);
     void plotO(int x,int y);
     void bresenham(int x0,int x1,int y0,int y1, int config); // config=0:red cross; config=1: origin
+    std::string Int_to_String(int n);
+
 
     // Ab hier technische Details die nicht für das Verständnis notwendig sind.
     void startLogging();

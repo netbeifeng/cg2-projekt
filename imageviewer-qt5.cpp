@@ -43,12 +43,18 @@
 #include <QPrintDialog>
 #endif
 #include<iostream>
-
-
+#include<sstream>
+#include<string.h>
+#include<string>
+#include<cstring>
+#include<QString>
 #include "imageviewer-qt5.h"
-
+using namespace std;
 int slider1Value=10;
+int avh=0;
+int vari=0;
 QImage originImage;
+QLabel* HV;
 
 ImageViewer::ImageViewer()
 {
@@ -216,6 +222,36 @@ void ImageViewer::setSlider1Value(int value){
    }
 
 }
+string ImageViewer::Int_to_String(int n){
+    ostringstream stream;
+    stream<<n;
+    return stream.str();
+}
+void ImageViewer::initDataTab2(){
+    QImage i2;
+    avh=0;
+    vari=0;
+    i2 = image->convertToFormat(QImage::Format_Grayscale8);
+    for(int i=0;i<i2.height();i++){
+        for(int j=0;j<i2.width();j++){
+            avh=avh+qGray(i2.pixel(i,j));
+        }
+    }
+    avh =(avh*1.0)/(i2.width()*i2.height());
+    float f = (float)(avh);
+    for(int i=0;i<i2.height();i++){
+        for(int j=0;j<i2.width();j++){
+            vari=vari+pow(qGray(i2.pixel(i,j))-f,2);
+        }
+    }
+    vari = vari/ (i2.width()*i2.height());
+    QString mater = "";
+    mater.append("Mittlere Helligkeit=");
+    mater.append(QString::number(avh));
+    mater.append("\nVarianz=");
+    mater.append(QString::number(vari));
+    HV->setText(mater);
+}
 /**************************************************************************************** 
 *   
 *  mit dieser Methode können sie sich pro Aufgabe ein  Tab anlegen, in der die Ein-
@@ -226,7 +262,7 @@ void ImageViewer::setSlider1Value(int value){
 
 void ImageViewer::generateControlPanels()
 {
-	// first tab
+    // uebung1
 
     m_option_panel1 = new QWidget();
 	m_option_layout1 = new QVBoxLayout();
@@ -236,9 +272,6 @@ void ImageViewer::generateControlPanels()
 	button1 = new QPushButton();
 	button1->setText("Apply algorithm");
 
-	button2 = new QPushButton();
-	button2->setText("do something else");
-
     slider1 = new QSlider(Qt::Horizontal);
     slider1->setMinimum(0);
     slider1->setMaximum(100);
@@ -247,13 +280,12 @@ void ImageViewer::generateControlPanels()
 	QObject::connect(button1, SIGNAL (clicked()), this, SLOT (applyExampleAlgorithm()));
     QObject::connect(slider1, SIGNAL (valueChanged(int)), this, SLOT (setSlider1Value(int)));
 
-	m_option_layout1->addWidget(button1);
-	m_option_layout1->addWidget(button2);
+    m_option_layout1->addWidget(button1);
     m_option_layout1->addWidget(slider1);
-	tabWidget->addTab(m_option_panel1,"first tab");   
+    tabWidget->addTab(m_option_panel1,"uebung1");
 
 
-	// another tab 
+    // uebung2
 
     m_option_panel2 = new QWidget();
 	m_option_layout2 = new QVBoxLayout();
@@ -261,10 +293,16 @@ void ImageViewer::generateControlPanels()
 
 	spinbox1 = new QSpinBox(tabWidget);
 
-	m_option_layout2->addWidget(new QLabel("description of parameter etc."));
+    button2 = new QPushButton();
+    button2->setText("Get H&V");
+    HV = new QLabel("click to see");
+    m_option_layout2->addWidget(HV);
+    QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
+    m_option_layout2->addWidget(button2);
+
 	m_option_layout2->addWidget(spinbox1);
 
-	tabWidget->addTab(m_option_panel2,"another tab");
+    tabWidget->addTab(m_option_panel2,"uebung2");
 	tabWidget->show();
 
 
