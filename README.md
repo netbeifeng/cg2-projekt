@@ -5,9 +5,9 @@
 pw: wise_2021
 
 # Exercises
-- E1
-- E2
-- E3
-- E4
-- E5
-- E6
+- [E1](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_01.pdf)
+- [E2](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_02.pdf)
+- [E3](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_03.pdf)
+- [E4](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_04.pdf)
+- [E5](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_05.pdf)
+- [E6](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_06.pdf)
