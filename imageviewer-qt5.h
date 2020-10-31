@@ -114,7 +114,10 @@ protected:
     // in diesen Beiden Methoden sind Änderungen nötig bzw. sie dienen als
     // Vorlage für eigene Methoden.
     void generateControlPanels();
-
+    // definiert von Bozhen*
+    void plot(int x,int y);
+    void plotO(int x,int y);
+    void bresenham(int x0,int x1,int y0,int y1, int config); // config=0:red cross; config=1: origin
 
     // Ab hier technische Details die nicht für das Verständnis notwendig sind.
     void startLogging();

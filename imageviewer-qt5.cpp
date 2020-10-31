@@ -93,48 +93,123 @@ void ImageViewer::applyExampleAlgorithm()
 	}
 }
 
+void ImageViewer::bresenham(int x0,int x1,int y0,int y1,int config){
+
+//    int deltax = x1 - x0;
+//    int deltay = abs(y1 - y0);
+//    int error = deltax / 2;
+//    int ystep;
+//    int y = y0;
+//    int p=2*deltay -deltax;
+//    int x = x0;
+//    while(x<x1){
+//        if(p>=0){
+//            plot(x,y);
+//            y=y+1;
+//            p=p+2*deltay-2*deltax;
+//        }
+//        else{
+//            plot(x,y);
+//            p=p+2*deltay;
+//        }
+//        x=x+1;
+//    }
+
+    boolean steep = (abs(y1 - y0) > abs(x1 - x0));
+         if (steep){
+            //swap(x0,y0)
+            int temp=x0;
+            x0=y0;
+            y0=temp;
+            // swap(x1, y1)
+            temp=x1;
+            x1=y1;
+            y1=temp;
+         }
+         if (x0 > x1){
+             //swap(x0, x1)
+             int temp=x0;
+             x0=x1;
+             x1=temp;
+             //swap(y0, y1)
+             temp=y0;
+             y0=y1;
+             y1=temp;
+         }
+         int deltax = x1 - x0;
+         int deltay = abs(y1 - y0);
+         int error = deltax / 2;
+         int ystep;
+         int y = y0;
+         if (y0 < y1){ystep = 1;} else {ystep = -1;}
+         for (int x=x0; x<x1; x++){
+             if (steep) {if(config == 0){plot(y,x);} else {plotO(y,x);}} else {if(config==0){plot(x,y);} else {plotO(x,y);}}
+             error = error - deltay;
+             if (error < 0){
+                 y = y + ystep;
+                 error = error + deltax;
+             }
+         }
+}
+
+
+void ImageViewer::plot(int x, int y){
+    image->setPixel(x,y,qRgb(255,0,0));
+}
+
+void ImageViewer::plotO(int x, int y){
+    image->setPixel(x,y,originImage.pixel(x,y));
+}
 void ImageViewer::setSlider1Value(int value){
     slider1Value = value;
     std::cout<<slider1Value<<std::endl;
     if(image!=NULL){
      int w=image->width();
      int h=image->height();
-     float i=w/2;
-     float j=h/2;
+     //set it back to origin* status
+     //bresenham(0,w,0,h,1);
+
 
      for(int i=0;i<w;i++) {
          for(int j=0;j<h;j++) {
-             if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+             if(((((i*1.0)/(j*1.0)) - (w*1.0)/(h*1.0)) < 0.1) && ((((i*1.0)/(j*1.0)) - (w*1.0)/(h*1.0)) > -0.1)){
                 image->setPixel(i,j,originImage.pixel(i,j));
-                std::cout<<i<<std::endl;
-                image->setPixel((w-i),j,originImage.pixel(i,j));
+                image->setPixel((w-i),j,originImage.pixel((w-i),j));
              }
 
-//             if((((w-i)*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
-//                 QRgb colorful_pixel = originImage.pixel(i,j);
-//                 int gray = qGray(colorful_pixel);
-//                 QRgb gray_pixel = qRgb(gray,gray,gray);
-//                 image->setPixel((w-i),j,gray_pixel);
-//             }
+             if((((w-i)*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+                 QRgb colorful_pixel = originImage.pixel(i,j);
+                 int gray = qGray(colorful_pixel);
+                 QRgb gray_pixel = qRgb(gray,gray,gray);
+                 image->setPixel((w-i),j,gray_pixel);
+             }
          }
      }
 
+     //draw red cross
+//     float i=w/2;
+//     float j=h/2;
+//     while(i<((float)(w/2)*(1+(slider1Value*1.0)/100))) {
+//         while(j<(float)(h/2)*(1+(slider1Value*1.0)/100)){
+//             if(((((i*1.0)/(j*1.0)) - (w*1.0)/(h*1.0)) < 0.001) && ((((i*1.0)/(j*1.0)) - (w*1.0)/(h*1.0)) > -0.001)){
+//                    int it=(int)i;
+//                    int jt=(int)j;
+//                    image->setPixel(it,jt,qRgb(255,0,0));
+//                    image->setPixel(it,(h-jt),qRgb(255,0,0));
+//                    image->setPixel((w-it),jt,qRgb(255,0,0));
+//                    image->setPixel((w-it),(h-jt),qRgb(255,0,0));
+//               }
+//                j=j+1;
+//           }
+//           i=i+1;
+//           j=h/2;
+//        }
 
-     while(i<((float)(w/2)*(1+(slider1Value*1.0)/100))) {
-         while(j<(float)(h/2)*(1+(slider1Value*1.0)/100)){
-             if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
-                    int it=(int)i;
-                    int jt=(int)j;
-                    image->setPixel(it,jt,qRgb(255,0,0));
-                    image->setPixel(it,(h-jt),qRgb(255,0,0));
-                    image->setPixel((w-it),jt,qRgb(255,0,0));
-                    image->setPixel((w-it),(h-jt),qRgb(255,0,0));
-               }
-                j=j+1;
-           }
-           i=i+1;
-           j=h/2;
-        }
+     float sv100 = (slider1Value*1.0)/100;
+     float w2 = w/2;
+     float h2 = h/2;
+     bresenham((1-sv100)*w2,(sv100+1)*w2,(1-sv100)*h2,(sv100+1)*h2,0);
+     bresenham((1-sv100)*w2,(sv100+1)*w2,(h-(1-sv100)*h2),(h-(sv100+1)*h2),0);
      updateImageDisplay();
      //logFile << "example algorithm applied " << std::endl;
      //renewLogging();
@@ -308,7 +383,7 @@ bool ImageViewer::loadFile(const QString &fileName)
     }
 
     image = new QImage(fileName);
-
+    originImage = image->copy();
 	
 
     if (image->isNull()) {
