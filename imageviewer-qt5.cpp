@@ -47,6 +47,8 @@
 
 #include "imageviewer-qt5.h"
 
+int slider1Value=10;
+
 ImageViewer::ImageViewer()
 {
 
@@ -68,31 +70,49 @@ ImageViewer::ImageViewer()
 
 void ImageViewer::applyExampleAlgorithm()
 {
+
 	if(image!=NULL)
 	{
-        for(int i=0;i<image->width();i++) {
-            for(int j=0;j<image->height();j++) {
+        int w=image->width();
+        int h=image->height();
+        for(int i=0;i<w;i++) {
+            for(int j=0;j<h;j++) {
                 QRgb colorful_pixel = image->pixel(i,j);
                 int gray = qGray(colorful_pixel);
                 QRgb gray_pixel = qRgb(gray,gray,gray);
                 image->setPixel(i,j,gray_pixel);
             }
         }
-		for(int i=0;i<std::min(image->width(),image->height());i++)
-		{
-			// macht die Farbe schwarz, bitte recherchieren wie eine andere Farbe gesetzt wird ...
+        std::cout<<slider1Value<<std::endl;
+        float i=w/2;
+        float j=h/2;
 
-            image->setPixel(i,i,qRgb(255,0,0));
-		}
+        while(i<(w/2)*(1+slider1Value/100)) {
+            while(j<(h/2)*(1+slider1Value/100)){
+                if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+                    int it=(int)i;
+                    int jt=(int)j;
+                    image->setPixel(it,jt,qRgb(255,0,0));
+                    image->setPixel(it,(h-jt),qRgb(255,0,0));
+                    image->setPixel((w-it),jt,qRgb(255,0,0));
+                    image->setPixel((w-it),(h-jt),qRgb(255,0,0));
+                }
+                j=j+1;
+            }
+            i=i+1;
+        }
+
+
 	updateImageDisplay();
  	logFile << "example algorithm applied " << std::endl;
 	renewLogging();
 	}
-
-       
- 	
 }
 
+void ImageViewer::setSlider1Value(int value){
+    slider1Value = value;
+    std::cout<<slider1Value<<std::endl;
+}
 /**************************************************************************************** 
 *   
 *  mit dieser Methode können sie sich pro Aufgabe ein  Tab anlegen, in der die Ein-
@@ -105,7 +125,7 @@ void ImageViewer::generateControlPanels()
 {
 	// first tab
 
-    	m_option_panel1 = new QWidget();
+    m_option_panel1 = new QWidget();
 	m_option_layout1 = new QVBoxLayout();
 	m_option_panel1->setLayout(m_option_layout1);      
 
@@ -116,16 +136,23 @@ void ImageViewer::generateControlPanels()
 	button2 = new QPushButton();
 	button2->setText("do something else");
 
+    slider1 = new QSlider(Qt::Horizontal);
+    slider1->setMinimum(0);
+    slider1->setMaximum(100);
+    slider1->setValue(10);
+
 	QObject::connect(button1, SIGNAL (clicked()), this, SLOT (applyExampleAlgorithm()));
- 
+    QObject::connect(slider1, SIGNAL (valueChanged(int)), this, SLOT (setSlider1Value(int)));
+
 	m_option_layout1->addWidget(button1);
 	m_option_layout1->addWidget(button2);
+    m_option_layout1->addWidget(slider1);
 	tabWidget->addTab(m_option_panel1,"first tab");   
 
 
 	// another tab 
 
-        m_option_panel2 = new QWidget();
+    m_option_panel2 = new QWidget();
 	m_option_layout2 = new QVBoxLayout();
 	m_option_panel2->setLayout(m_option_layout2);      
 

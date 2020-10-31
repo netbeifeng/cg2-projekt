@@ -58,6 +58,7 @@ class QVBoxLayout;
 class QTabWidget;
 class QPushButton;
 class QSpinBox;
+class QSlider;
 
 class ImageViewer : public QMainWindow
 {
@@ -75,7 +76,7 @@ class ImageViewer : public QMainWindow
      QPushButton* button1;
      QPushButton* button2;
      QSpinBox* spinbox1;
-
+     QSlider* slider1;
      // hier können weitere GUI Objekte hin wie Buttons Slider etc. 
 
 
@@ -83,7 +84,7 @@ class ImageViewer : public QMainWindow
 
      // Beispiel für einen Algorithmus
      void applyExampleAlgorithm();
-
+     void setSlider1Value(int);
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
      void open();
