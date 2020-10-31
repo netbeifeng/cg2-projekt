@@ -48,6 +48,7 @@
 #include "imageviewer-qt5.h"
 
 int slider1Value=10;
+QImage originImage;
 
 ImageViewer::ImageViewer()
 {
@@ -70,11 +71,11 @@ ImageViewer::ImageViewer()
 
 void ImageViewer::applyExampleAlgorithm()
 {
-
 	if(image!=NULL)
 	{
         int w=image->width();
         int h=image->height();
+        //*image = image->convertToFormat(QImage::Format_Grayscale8);
         for(int i=0;i<w;i++) {
             for(int j=0;j<h;j++) {
                 QRgb colorful_pixel = image->pixel(i,j);
@@ -83,24 +84,7 @@ void ImageViewer::applyExampleAlgorithm()
                 image->setPixel(i,j,gray_pixel);
             }
         }
-        std::cout<<slider1Value<<std::endl;
-        float i=w/2;
-        float j=h/2;
-
-        while(i<(w/2)*(1+slider1Value/100)) {
-            while(j<(h/2)*(1+slider1Value/100)){
-                if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
-                    int it=(int)i;
-                    int jt=(int)j;
-                    image->setPixel(it,jt,qRgb(255,0,0));
-                    image->setPixel(it,(h-jt),qRgb(255,0,0));
-                    image->setPixel((w-it),jt,qRgb(255,0,0));
-                    image->setPixel((w-it),(h-jt),qRgb(255,0,0));
-                }
-                j=j+1;
-            }
-            i=i+1;
-        }
+        originImage = image->copy();
 
 
 	updateImageDisplay();
@@ -112,6 +96,50 @@ void ImageViewer::applyExampleAlgorithm()
 void ImageViewer::setSlider1Value(int value){
     slider1Value = value;
     std::cout<<slider1Value<<std::endl;
+    if(image!=NULL){
+     int w=image->width();
+     int h=image->height();
+     float i=w/2;
+     float j=h/2;
+
+     for(int i=0;i<w;i++) {
+         for(int j=0;j<h;j++) {
+             if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+                image->setPixel(i,j,originImage.pixel(i,j));
+                std::cout<<i<<std::endl;
+                image->setPixel((w-i),j,originImage.pixel(i,j));
+             }
+
+//             if((((w-i)*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+//                 QRgb colorful_pixel = originImage.pixel(i,j);
+//                 int gray = qGray(colorful_pixel);
+//                 QRgb gray_pixel = qRgb(gray,gray,gray);
+//                 image->setPixel((w-i),j,gray_pixel);
+//             }
+         }
+     }
+
+
+     while(i<((float)(w/2)*(1+(slider1Value*1.0)/100))) {
+         while(j<(float)(h/2)*(1+(slider1Value*1.0)/100)){
+             if(((i*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+                    int it=(int)i;
+                    int jt=(int)j;
+                    image->setPixel(it,jt,qRgb(255,0,0));
+                    image->setPixel(it,(h-jt),qRgb(255,0,0));
+                    image->setPixel((w-it),jt,qRgb(255,0,0));
+                    image->setPixel((w-it),(h-jt),qRgb(255,0,0));
+               }
+                j=j+1;
+           }
+           i=i+1;
+           j=h/2;
+        }
+     updateImageDisplay();
+     //logFile << "example algorithm applied " << std::endl;
+     //renewLogging();
+   }
+
 }
 /**************************************************************************************** 
 *   
