@@ -47,6 +47,7 @@
 #endif
 
 #include "fstream"
+#include "qcustomplot.h"
 class QAction;
 class QLabel;
 class QMenu;
@@ -76,10 +77,12 @@ class ImageViewer : public QMainWindow
 
      QPushButton* button1;
      QPushButton* button2;
+     QPushButton* button3;
      QSpinBox* spinbox1;
      QSlider* slider1;
      // hier können weitere GUI Objekte hin wie Buttons Slider etc. 
 
+     QCustomPlot *m_histogram;
 
  private slots:
 

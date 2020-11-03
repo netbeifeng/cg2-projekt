@@ -1,3 +1,4 @@
+QT += core
 QT += widgets
 qtHaveModule(printsupport): QT += printsupport
 
@@ -15,5 +16,3 @@ wince*: {
    DEPLOYMENT_PLUGIN += qjpeg qgif
 }
 
-SOURCES += \
-    qcustomplot.cpp

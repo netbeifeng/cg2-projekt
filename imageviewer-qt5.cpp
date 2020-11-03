@@ -370,11 +370,28 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addWidget(button2);
     m_option_layout2->addLayout(m_change_dynamik);
 
+    m_option_layout2->addWidget(new QLabel("Histogram"));
+    m_histogram = new QCustomPlot();
+    m_histogram->resize(200,300);
+    m_histogram->xAxis->setLabel(tr("Grayscale"));
+    m_histogram->yAxis->setLabel(tr("Number"));
+    m_histogram->addGraph();
+    QCPTextElement *title = new QCPTextElement(m_histogram,tr("Grayscale histogram"));
+
+    m_histogram->plotLayout()->insertRow(0);
+    m_histogram->plotLayout()->addElement(0,0,title);
+    m_histogram->xAxis->setRange(0,255);
+    m_histogram->graph(0)->setLineStyle(QCPGraph::lsImpulse);
+
+    m_option_layout2->addWidget(m_histogram);
+
+    button3 = new QPushButton();
+    button3->setText("Calculate Histogram");
+    QObject::connect(button3, SIGNAL (clicked()), this, SLOT (histogram()));
 
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");
 	tabWidget->show();
 	// Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen
-
 }
 
 
