@@ -142,6 +142,7 @@ protected:
     QTextEdit* logBrowser;
     QWidget* centralwidget;
     QLabel* imageLabel;
+    QLabel* HV;
     QScrollArea* scrollArea;
     double scaleFactor;
     QImage* image;

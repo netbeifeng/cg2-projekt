@@ -58,7 +58,7 @@ int avh=0;
 int vari=0;
 QImage originImage;
 QImage originGrayImage;
-QLabel* HV;
+
 
 ImageViewer::ImageViewer()
 {
@@ -367,6 +367,8 @@ void ImageViewer::generateControlPanels()
     QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
     m_option_layout2->addWidget(button2);
     m_option_layout2->addLayout(m_change_dynamik);
+
+
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");
 	tabWidget->show();
 	// Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen
