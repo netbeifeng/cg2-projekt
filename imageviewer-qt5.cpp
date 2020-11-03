@@ -49,6 +49,8 @@
 #include<cstring>
 #include<QString>
 #include "imageviewer-qt5.h"
+#include <QtWidgets>
+
 using namespace std;
 
 int spinbox1Value = 8;
