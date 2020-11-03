@@ -50,10 +50,14 @@
 #include<QString>
 #include "imageviewer-qt5.h"
 using namespace std;
+
+int spinbox1Value = 8;
+
 int slider1Value=10;
 int avh=0;
 int vari=0;
 QImage originImage;
+QImage originGrayImage;
 QLabel* HV;
 
 ImageViewer::ImageViewer()
@@ -222,35 +226,38 @@ void ImageViewer::setSlider1Value(int value){
    }
 
 }
+
 string ImageViewer::Int_to_String(int n){
     ostringstream stream;
     stream<<n;
     return stream.str();
 }
 void ImageViewer::initDataTab2(){
-    QImage i2;
-    avh=0;
-    vari=0;
-    i2 = image->convertToFormat(QImage::Format_Grayscale8);
-    for(int i=0;i<i2.height();i++){
-        for(int j=0;j<i2.width();j++){
-            avh=avh+qGray(i2.pixel(i,j));
+    if(image!=NULL) {
+        QImage i2;
+        avh=0;
+        vari=0;
+        i2 = image->convertToFormat(QImage::Format_Grayscale8);
+        for(int i=0;i<i2.height();i++){
+            for(int j=0;j<i2.width();j++){
+                avh=avh+qGray(i2.pixel(i,j));
+            }
         }
-    }
-    avh =(avh*1.0)/(i2.width()*i2.height());
-    float f = (float)(avh);
-    for(int i=0;i<i2.height();i++){
-        for(int j=0;j<i2.width();j++){
-            vari=vari+pow(qGray(i2.pixel(i,j))-f,2);
+        avh =(avh*1.0)/(i2.width()*i2.height());
+        float f = (float)(avh);
+        for(int i=0;i<i2.height();i++){
+            for(int j=0;j<i2.width();j++){
+                vari=vari+pow(qGray(i2.pixel(i,j))-f,2);
+            }
         }
+        vari = vari/ (i2.width()*i2.height());
+        QString mater = "";
+        mater.append("Mittlere Helligkeit = ");
+        mater.append(QString::number(avh));
+        mater.append("\nVarianz = ");
+        mater.append(QString::number(vari));
+        HV->setText(mater);
     }
-    vari = vari/ (i2.width()*i2.height());
-    QString mater = "";
-    mater.append("Mittlere Helligkeit=");
-    mater.append(QString::number(avh));
-    mater.append("\nVarianz=");
-    mater.append(QString::number(vari));
-    HV->setText(mater);
 }
 /**************************************************************************************** 
 *   
@@ -259,6 +266,38 @@ void ImageViewer::initDataTab2(){
 *  tierenden Algorithmen gestatet werden.
 *
 *****************************************************************************************/
+
+void ImageViewer::changeDynamik(int value){
+    spinbox1Value = value;
+    cout<<spinbox1Value<<endl;
+}
+
+void ImageViewer::dynamic(int dit) {
+    if(image!=NULL){
+        int w=image->width();
+        int h=image->height();
+        for(int i = 0; i < w; i++) {
+            for(int j = 0; j < h; j++) {
+
+                QRgb pixel_rgb = originGrayImage.pixel(i,j);
+                int *pixel_blue = pixel_rgb.blue;
+                image->setPixel(i,j,pixel);
+
+//                image->setPixel(i,j,originGrayImage.pixel(i,j));
+            }
+        }
+        updateImageDisplay();
+    }
+}
+
+void ImageViewer::confirmDynamik() {
+    if(image!=NULL){
+        int w=image->width();
+        int h=image->height();
+        dynamic(8-spinbox1Value);
+    }
+
+}
 
 void ImageViewer::generateControlPanels()
 {
@@ -289,9 +328,23 @@ void ImageViewer::generateControlPanels()
 
     m_option_panel2 = new QWidget();
 	m_option_layout2 = new QVBoxLayout();
-	m_option_panel2->setLayout(m_option_layout2);      
+    m_change_dynamik = new QHBoxLayout();
+    m_change_dynamik->addWidget(new QLabel("Dynamik: "));
+    spinbox1 = new QSpinBox(tabWidget);
+    spinbox1->setMaximum(8);
+    spinbox1->setMinimum(1);
+    spinbox1->setValue(8);
+    spinbox1->setMaximumWidth(200);
+    QPushButton *confirm_dynamik = new QPushButton("Change Dynamic");
+    QObject::connect(confirm_dynamik, SIGNAL (clicked()), this, SLOT (confirmDynamik()));
 
-	spinbox1 = new QSpinBox(tabWidget);
+
+    QObject::connect(spinbox1, SIGNAL (valueChanged(int)), this, SLOT (changeDynamik(int)));
+    m_change_dynamik->addWidget(spinbox1);
+    m_change_dynamik->addWidget(confirm_dynamik);
+    m_option_layout2->addLayout(m_change_dynamik);
+
+	m_option_panel2->setLayout(m_option_layout2);      
 
     button2 = new QPushButton();
     button2->setText("Get H&V");
@@ -300,12 +353,8 @@ void ImageViewer::generateControlPanels()
     QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
     m_option_layout2->addWidget(button2);
 
-	m_option_layout2->addWidget(spinbox1);
-
     tabWidget->addTab(m_option_panel2,"uebung2");
 	tabWidget->show();
-
-
 	// Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen
 
 }
@@ -422,7 +471,13 @@ bool ImageViewer::loadFile(const QString &fileName)
 
     image = new QImage(fileName);
     originImage = image->copy();
-	
+    originGrayImage = originImage.copy();
+    for(int i = 0; i < originGrayImage.width(); i++) {
+        for(int j = 0; j < originGrayImage.height(); j++) {
+            QRgb gray = qGray(originGrayImage.pixel(i,j));
+            originGrayImage.setPixel(i,j,qRgb(gray,gray,gray));
+        }
+    }
 
     if (image->isNull()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),

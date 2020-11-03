@@ -54,6 +54,7 @@ class QScrollArea;
 class QScrollBar;
 class QTextEdit;
 class QVBoxLayout;
+class QHBoxLayout;
 class QTabWidget;
 class QPushButton;
 class QSpinBox;
@@ -67,6 +68,7 @@ class ImageViewer : public QMainWindow
 
      // Beispiel für GUI Elemente
      QWidget*	m_option_panel1;
+     QHBoxLayout* m_change_dynamik;
      QVBoxLayout*    m_option_layout1;
 
      QWidget*	m_option_panel2;
@@ -85,6 +87,8 @@ class ImageViewer : public QMainWindow
      void applyExampleAlgorithm();
      void setSlider1Value(int);
      void initDataTab2();
+     void changeDynamik(int);
+     void confirmDynamik();
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
      void open();
@@ -120,6 +124,7 @@ protected:
     void bresenham(int x0,int x1,int y0,int y1, int config); // config=0:red cross; config=1: origin
     std::string Int_to_String(int n);
 
+    void dynamic(int);
 
     // Ab hier technische Details die nicht für das Verständnis notwendig sind.
     void startLogging();
