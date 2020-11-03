@@ -183,12 +183,12 @@ void ImageViewer::setSlider1Value(int value){
                 image->setPixel((w-i),j,originImage.pixel((w-i),j));
              }
 
-             if((((w-i)*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
-                 QRgb colorful_pixel = originImage.pixel(i,j);
-                 int gray = qGray(colorful_pixel);
-                 QRgb gray_pixel = qRgb(gray,gray,gray);
-                 image->setPixel((w-i),j,gray_pixel);
-             }
+//             if((((w-i)*1.0)/(j*1.0)) == ((w*1.0)/(h*1.0))){
+//                 QRgb colorful_pixel = originImage.pixel(i,j);
+//                 int gray = qGray(colorful_pixel);
+//                 QRgb gray_pixel = qRgb(gray,gray,gray);
+//                 image->setPixel((w-i),j,gray_pixel);
+//             }
          }
      }
 
