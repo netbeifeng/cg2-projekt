@@ -272,18 +272,20 @@ void ImageViewer::changeDynamik(int value){
     cout<<spinbox1Value<<endl;
 }
 
+void ImageViewer::Histogram(){
+
+}
 void ImageViewer::dynamic(int dit) {
     if(image!=NULL){
         int w=image->width();
         int h=image->height();
         for(int i = 0; i < w; i++) {
             for(int j = 0; j < h; j++) {
-
-                QRgb pixel_rgb = originGrayImage.pixel(i,j);
-                int *pixel_blue = pixel_rgb.blue;
-                image->setPixel(i,j,pixel);
-
-//                image->setPixel(i,j,originGrayImage.pixel(i,j));
+                QColor pixel_rgb = originGrayImage.pixelColor(i,j);
+                pixel_rgb.setBlue(pixel_rgb.blue()>>dit<<dit);
+                pixel_rgb.setRed(pixel_rgb.red() >>dit<<dit);
+                pixel_rgb.setGreen(pixel_rgb.green() >>dit<<dit);
+                image->setPixel(i,j,pixel_rgb.rgb());
             }
         }
         updateImageDisplay();
