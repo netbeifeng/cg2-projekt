@@ -252,9 +252,9 @@ void ImageViewer::initDataTab2(){
         }
         vari = vari/ (i2.width()*i2.height());
         QString mater = "";
-        mater.append("Mittlere Helligkeit = ");
+        mater.append("<p><b>Mittlere Helligkeit</b> = ");
         mater.append(QString::number(avh));
-        mater.append("\nVarianz = ");
+        mater.append("</p>\n<b>Varianz</b> = ");
         mater.append(QString::number(vari));
         HV->setText(mater);
     }
@@ -335,7 +335,7 @@ void ImageViewer::generateControlPanels()
 
     m_option_layout1->addWidget(button1);
     m_option_layout1->addWidget(slider1);
-    tabWidget->addTab(m_option_panel1,"uebung1");
+    tabWidget->addTab(m_option_panel1,"Aufgabe 1");
 
 
     // uebung2
@@ -356,18 +356,18 @@ void ImageViewer::generateControlPanels()
     QObject::connect(spinbox1, SIGNAL (valueChanged(int)), this, SLOT (changeDynamik(int)));
     m_change_dynamik->addWidget(spinbox1);
     m_change_dynamik->addWidget(confirm_dynamik);
-    m_option_layout2->addLayout(m_change_dynamik);
+
 
 	m_option_panel2->setLayout(m_option_layout2);      
 
     button2 = new QPushButton();
     button2->setText("Get H&V");
-    HV = new QLabel("click to see");
+    HV = new QLabel("Click to see");
     m_option_layout2->addWidget(HV);
     QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
     m_option_layout2->addWidget(button2);
-
-    tabWidget->addTab(m_option_panel2,"uebung2");
+    m_option_layout2->addLayout(m_change_dynamik);
+    tabWidget->addTab(m_option_panel2,"Aufgabe 2");
 	tabWidget->show();
 	// Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen
 
