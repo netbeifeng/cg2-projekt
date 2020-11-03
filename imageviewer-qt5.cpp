@@ -272,8 +272,20 @@ void ImageViewer::changeDynamik(int value){
     cout<<spinbox1Value<<endl;
 }
 
-void ImageViewer::Histogram(){
-
+void ImageViewer::histogram(){
+    if(image!=NULL){
+     int w=image->width();
+     int h=image->height();
+     int histo[256];
+     for(int i=0;i<255;i++){
+         histo[i]=0;
+     }
+     for(int i = 0; i < w; i++) {
+        for(int j = 0; j < h; j++) {
+            histo[originGrayImage.pixelColor(i,j).blue()]+=1;
+        }
+     }
+    }
 }
 void ImageViewer::dynamic(int dit) {
     if(image!=NULL){

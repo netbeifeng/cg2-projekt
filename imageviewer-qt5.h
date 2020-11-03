@@ -89,6 +89,7 @@ class ImageViewer : public QMainWindow
      void initDataTab2();
      void changeDynamik(int);
      void confirmDynamik();
+     void histogram();
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
      void open();
