@@ -302,6 +302,7 @@ void ImageViewer::histogram(){
          }
      }
     m_histogram->yAxis->setRange(0,yMax);
+    m_histogram->graph(0)->setPen(QPen(QColor(178,34,34)));
     m_histogram->graph(0)->setData(vecX,vecY);
     m_histogram->replot();
    }
@@ -332,6 +333,13 @@ void ImageViewer::confirmDynamik() {
 
 void ImageViewer::generateControlPanels()
 {
+    auto lineA = new QFrame;
+    lineA->setFrameShape(QFrame::HLine);
+    lineA->setFrameShadow(QFrame::Sunken);
+
+    auto lineB = new QFrame;
+    lineB->setFrameShape(QFrame::HLine);
+    lineB->setFrameShadow(QFrame::Sunken);
     // uebung1
 
     m_option_panel1 = new QWidget();
@@ -378,14 +386,30 @@ void ImageViewer::generateControlPanels()
 	m_option_panel2->setLayout(m_option_layout2);      
 
     button2 = new QPushButton();
-    button2->setText("Get H&V");
-    HV = new QLabel("Click to see");
-    m_option_layout2->addWidget(HV);
-    QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
-    m_option_layout2->addWidget(button2);
-    m_option_layout2->addLayout(m_change_dynamik);
+    button2->setText("Get Mittleren Helligkeit and Varianz");
+    HV = new QLabel("Click <b><u>button</u></b> to get <b>Mittleren Helligkeit</b> and <b>Varianz</b>");
 
-    m_option_layout2->addWidget(new QLabel("Histogram"));
+    QHBoxLayout* h_mv = new QHBoxLayout();
+    QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
+    h_mv->addWidget(HV);
+    h_mv->addWidget(button2);
+
+
+    m_option_layout2->addLayout(h_mv);
+
+    m_option_layout2->addWidget(lineA);
+
+    m_option_layout2->addLayout(m_change_dynamik);
+    m_option_layout2->addWidget(lineB);
+    QHBoxLayout* h_his = new QHBoxLayout();
+    h_his->addWidget(new QLabel("Histogram:"));
+
+    button3 = new QPushButton();
+    button3->setText("Calculate Histogram");
+    QObject::connect(button3, SIGNAL (clicked()), this, SLOT (histogram()));
+    h_his->addWidget(button3);
+    m_option_layout2->addLayout(h_his);
+//    m_option_layout2->addWidget();
     m_histogram = new QCustomPlot();
     m_histogram->setMinimumHeight(400);
     m_histogram->xAxis->setLabel(tr("Grayscale"));
@@ -400,11 +424,8 @@ void ImageViewer::generateControlPanels()
 
     m_option_layout2->addWidget(m_histogram);
 
-    button3 = new QPushButton();
-    button3->setText("Calculate Histogram");
-    QObject::connect(button3, SIGNAL (clicked()), this, SLOT (histogram()));
 
-    m_option_layout2->addWidget(button3);
+//    m_option_layout2->addWidget(button3);
 
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");
 	tabWidget->show();
