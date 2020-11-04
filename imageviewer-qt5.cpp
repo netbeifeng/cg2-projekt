@@ -296,15 +296,14 @@ void ImageViewer::histogram(){
      }
 
      double yMax = 0;
-     for(int j = 0; j < 256 ; j++)
+     for(int j = 0; j < 255 ; j++)
      {
-         if(yMax < vecY.at(j))
-             yMax = vecY.at(j);
+         if(yMax < vecY.at(j)){
+            yMax = vecY.at(j);
+         }
      }
-    cout<<yMax<<endl;
     m_histogram->yAxis->setRange(0,yMax);
     m_histogram->graph(0)->setData(vecX,vecY);
-    m_histogram->rescaleAxes();
     m_histogram->replot();
    }
 }
@@ -397,7 +396,7 @@ void ImageViewer::generateControlPanels()
 
     m_histogram->plotLayout()->insertRow(0);
     m_histogram->plotLayout()->addElement(0,0,title);
-    m_histogram->xAxis->setRange(-1,255);
+    m_histogram->xAxis->setRange(-1,260);
     m_histogram->graph(0)->setLineStyle(QCPGraph::lsImpulse);
 
     m_option_layout2->addWidget(m_histogram);
