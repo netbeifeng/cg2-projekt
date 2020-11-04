@@ -294,7 +294,6 @@ void ImageViewer::histogram(){
             vecY[nIndex] = vecY.at(nIndex) + 1;
         }
      }
-
      double yMax = 0;
      for(int j = 0; j < 255 ; j++)
      {
@@ -396,7 +395,7 @@ void ImageViewer::generateControlPanels()
 
     m_histogram->plotLayout()->insertRow(0);
     m_histogram->plotLayout()->addElement(0,0,title);
-    m_histogram->xAxis->setRange(-1,260);
+    m_histogram->xAxis->setRange(-1,255);
     m_histogram->graph(0)->setLineStyle(QCPGraph::lsImpulse);
 
     m_option_layout2->addWidget(m_histogram);
