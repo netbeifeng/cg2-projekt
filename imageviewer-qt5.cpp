@@ -50,6 +50,8 @@
 #include<QString>
 #include "imageviewer-qt5.h"
 #include <QtWidgets>
+#include "qcustomplot.h"
+#include <QVector>
 
 using namespace std;
 
@@ -278,16 +280,33 @@ void ImageViewer::histogram(){
     if(image!=NULL){
      int w=image->width();
      int h=image->height();
-     int histo[256];
-     for(int i=0;i<255;i++){
-         histo[i]=0;
+     QVector<double> vecX;
+     QVector<double> vecY(256,0);
+     int i = 0;
+     while (256 != i) {
+         vecX.append(i);
+         ++i;
      }
+
      for(int i = 0; i < w; i++) {
         for(int j = 0; j < h; j++) {
-            histo[originGrayImage.pixelColor(i,j).blue()]+=1;
+            int nIndex = int(image->bits()[i*w + j]);
+            vecY[nIndex] = vecY.at(nIndex) + 1;
         }
      }
-    }
+
+     double yMax = 0;
+     for(int j = 0; j < 256 ; j++)
+     {
+         if(yMax < vecY.at(j))
+             yMax = vecY.at(j);
+     }
+    cout<<yMax<<endl;
+    m_histogram->yAxis->setRange(0,yMax);
+    m_histogram->graph(0)->setData(vecX,vecY);
+    m_histogram->rescaleAxes();
+    m_histogram->replot();
+   }
 }
 void ImageViewer::dynamic(int dit) {
     if(image!=NULL){
@@ -308,8 +327,6 @@ void ImageViewer::dynamic(int dit) {
 
 void ImageViewer::confirmDynamik() {
     if(image!=NULL){
-        int w=image->width();
-        int h=image->height();
         dynamic(8-spinbox1Value);
     }
 
@@ -372,7 +389,7 @@ void ImageViewer::generateControlPanels()
 
     m_option_layout2->addWidget(new QLabel("Histogram"));
     m_histogram = new QCustomPlot();
-    m_histogram->resize(200,300);
+    m_histogram->setMinimumHeight(400);
     m_histogram->xAxis->setLabel(tr("Grayscale"));
     m_histogram->yAxis->setLabel(tr("Number"));
     m_histogram->addGraph();
@@ -380,7 +397,7 @@ void ImageViewer::generateControlPanels()
 
     m_histogram->plotLayout()->insertRow(0);
     m_histogram->plotLayout()->addElement(0,0,title);
-    m_histogram->xAxis->setRange(0,255);
+    m_histogram->xAxis->setRange(-1,255);
     m_histogram->graph(0)->setLineStyle(QCPGraph::lsImpulse);
 
     m_option_layout2->addWidget(m_histogram);
@@ -388,6 +405,8 @@ void ImageViewer::generateControlPanels()
     button3 = new QPushButton();
     button3->setText("Calculate Histogram");
     QObject::connect(button3, SIGNAL (clicked()), this, SLOT (histogram()));
+
+    m_option_layout2->addWidget(button3);
 
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");
 	tabWidget->show();
