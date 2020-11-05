@@ -16,3 +16,4 @@ wince*: {
    DEPLOYMENT_PLUGIN += qjpeg qgif
 }
 
+RC_ICONS = "lenna.ico"
