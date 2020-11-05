@@ -366,6 +366,7 @@ void ImageViewer::confirmDynamik() {
     if(image!=NULL){
         dynamic(8-spinbox1Value);
         button3->click();
+        button2->click();
     } else {
         alert();
     }
