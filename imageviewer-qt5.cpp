@@ -58,6 +58,8 @@ using namespace std;
 int spinbox1Value = 8;
 
 int slider1Value=10;
+int slider2Value=10;
+int slider3Value=10;
 int avh=0;
 int vari=0;
 QImage originImage;
@@ -104,7 +106,9 @@ void ImageViewer::applyExampleAlgorithm()
 	updateImageDisplay();
  	logFile << "example algorithm applied " << std::endl;
 	renewLogging();
-	}
+    } else {
+        alert();
+    }
 }
 
 void ImageViewer::bresenham(int x0,int x1,int y0,int y1,int config){
@@ -174,6 +178,28 @@ void ImageViewer::plot(int x, int y){
 void ImageViewer::plotO(int x, int y){
     image->setPixel(x,y,originImage.pixel(x,y));
 }
+
+
+void ImageViewer::setSlider3Value(int value) {
+    if(image!=NULL) {
+        slider3Value = value;
+        label_contrast_value->setText(QString::number(value));
+        updateImageDisplay();
+    } else {
+        alert();
+    }
+}
+
+void ImageViewer::setSlider2Value(int value) {
+    if(image!=NULL) {
+        slider2Value = value;
+        label_brightness_value->setText(QString::number(value));
+        updateImageDisplay();
+    } else {
+        alert();
+    }
+}
+
 void ImageViewer::setSlider1Value(int value){
     slider1Value = value;
     std::cout<<slider1Value<<std::endl;
@@ -227,7 +253,9 @@ void ImageViewer::setSlider1Value(int value){
      updateImageDisplay();
      //logFile << "example algorithm applied " << std::endl;
      //renewLogging();
-   }
+   } else {
+        alert();
+    }
 
 }
 
@@ -261,6 +289,8 @@ void ImageViewer::initDataTab2(){
         mater.append("</p>\n<b>Varianz</b> = ");
         mater.append(QString::number(vari));
         HV->setText(mater);
+    } else {
+        alert();
     }
 }
 /**************************************************************************************** 
@@ -305,7 +335,9 @@ void ImageViewer::histogram(){
     m_histogram->graph(0)->setPen(QPen(QColor(178,34,34)));
     m_histogram->graph(0)->setData(vecX,vecY);
     m_histogram->replot();
-   }
+   } else {
+        alert();
+    }
 }
 void ImageViewer::dynamic(int dit) {
     if(image!=NULL){
@@ -321,14 +353,30 @@ void ImageViewer::dynamic(int dit) {
             }
         }
         updateImageDisplay();
+    } else {
+        alert();
     }
+}
+
+void ImageViewer::alert() {
+    QMessageBox::information(this, QString::fromLocal8Bit("Error"),QString::fromLocal8Bit("Please select a image first!"));
 }
 
 void ImageViewer::confirmDynamik() {
     if(image!=NULL){
         dynamic(8-spinbox1Value);
+        button3->click();
+    } else {
+        alert();
     }
+}
 
+void ImageViewer::automaticContrast() {
+    if(image!=NULL) {
+        updateImageDisplay();
+    } else {
+        alert();
+    }
 }
 
 void ImageViewer::generateControlPanels()
@@ -340,6 +388,13 @@ void ImageViewer::generateControlPanels()
     auto lineB = new QFrame;
     lineB->setFrameShape(QFrame::HLine);
     lineB->setFrameShadow(QFrame::Sunken);
+
+    auto lineC = new QFrame;
+    lineC->setFrameShape(QFrame::HLine);
+    lineC->setFrameShadow(QFrame::Sunken);
+
+    QFont ft;
+    ft.setPointSize(10);
     // uebung1
 
     m_option_panel1 = new QWidget();
@@ -368,7 +423,9 @@ void ImageViewer::generateControlPanels()
     m_option_panel2 = new QWidget();
 	m_option_layout2 = new QVBoxLayout();
     m_change_dynamik = new QHBoxLayout();
-    m_change_dynamik->addWidget(new QLabel("Dynamik: "));
+    QLabel* label_dynamic = new QLabel("Dynamik: ");
+    label_dynamic->setFont(ft);
+    m_change_dynamik->addWidget(label_dynamic);
     spinbox1 = new QSpinBox(tabWidget);
     spinbox1->setMaximum(8);
     spinbox1->setMinimum(1);
@@ -387,8 +444,9 @@ void ImageViewer::generateControlPanels()
 
     button2 = new QPushButton();
     button2->setText("Get Mittleren Helligkeit and Varianz");
-    HV = new QLabel("Click <b><u>button</u></b> to get <b>Mittleren Helligkeit</b> and <b>Varianz</b>");
+    HV = new QLabel("Click the <b><u>button</u></b> to get <b>Mittleren Helligkeit</b> and <b>Varianz</b>");
 
+    HV->setFont(ft);
     QHBoxLayout* h_mv = new QHBoxLayout();
     QObject::connect(button2, SIGNAL (clicked()), this, SLOT (initDataTab2()));
     h_mv->addWidget(HV);
@@ -402,7 +460,9 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addLayout(m_change_dynamik);
     m_option_layout2->addWidget(lineB);
     QHBoxLayout* h_his = new QHBoxLayout();
-    h_his->addWidget(new QLabel("Histogram:"));
+    QLabel* label_histogram = new QLabel("Histogram:");
+    label_histogram->setFont(ft);
+    h_his->addWidget(label_histogram);
 
     button3 = new QPushButton();
     button3->setText("Calculate Histogram");
@@ -411,7 +471,7 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addLayout(h_his);
 //    m_option_layout2->addWidget();
     m_histogram = new QCustomPlot();
-    m_histogram->setMinimumHeight(400);
+    m_histogram->setMaximumHeight(300);
     m_histogram->xAxis->setLabel(tr("Grayscale"));
     m_histogram->yAxis->setLabel(tr("Number"));
     m_histogram->addGraph();
@@ -421,10 +481,45 @@ void ImageViewer::generateControlPanels()
     m_histogram->plotLayout()->addElement(0,0,title);
     m_histogram->xAxis->setRange(-1,255);
     m_histogram->graph(0)->setLineStyle(QCPGraph::lsImpulse);
-
+//    m_histogram->resize(1,1);
     m_option_layout2->addWidget(m_histogram);
+    m_option_layout2->addWidget(lineC);
 
+    QHBoxLayout* h_brightness = new QHBoxLayout();
+    QLabel* label_brightness = new QLabel("Brightness: ");
+    label_brightness->setFont(ft);
+    slider2 = new QSlider(Qt::Horizontal);
+    slider2->setMinimum(-1);
+    slider2->setMaximum(256);
+    slider2->setValue(slider2Value);
+    slider2->setFixedWidth(600);
+    label_brightness_value = new QLabel(QString::number(slider2Value));
+    QObject::connect(slider2, SIGNAL (valueChanged(int)), this, SLOT (setSlider2Value(int)));
+    h_brightness->addWidget(label_brightness);
+    h_brightness->addWidget(label_brightness_value);
+    h_brightness->addWidget(slider2);
 
+    QHBoxLayout* h_contrast = new QHBoxLayout();
+    QLabel* label_contrast = new QLabel("Contrast: ");
+    label_contrast->setFont(ft);
+    slider3 = new QSlider(Qt::Horizontal);
+    slider3->setMinimum(-1);
+    slider3->setMaximum(256);
+    slider3->setValue(slider3Value);
+    slider3->setFixedWidth(600);
+    label_contrast_value = new QLabel(QString::number(slider3Value));
+    QObject::connect(slider3, SIGNAL (valueChanged(int)), this, SLOT (setSlider3Value(int)));
+    h_contrast->addWidget(label_contrast);
+    h_contrast->addWidget(label_contrast_value);
+    h_contrast->addWidget(slider3);
+
+    m_option_layout2->addLayout(h_brightness);
+    m_option_layout2->addLayout(h_contrast);
+    m_option_layout2->addWidget(lineC);
+
+    QPushButton* automatic_contrast_adjust = new QPushButton("Automatic Contrast Adjust");
+    QObject::connect(automatic_contrast_adjust, SIGNAL (clicked()), this, SLOT (automaticContrast()));
+    m_option_layout2->addWidget(automatic_contrast_adjust);
 //    m_option_layout2->addWidget(button3);
 
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");

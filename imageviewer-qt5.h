@@ -80,6 +80,11 @@ class ImageViewer : public QMainWindow
      QPushButton* button3;
      QSpinBox* spinbox1;
      QSlider* slider1;
+     QSlider* slider2;
+     QSlider* slider3;
+
+     QLabel* label_contrast_value;
+     QLabel* label_brightness_value;
      // hier können weitere GUI Objekte hin wie Buttons Slider etc. 
 
      QCustomPlot *m_histogram;
@@ -89,7 +94,10 @@ class ImageViewer : public QMainWindow
      // Beispiel für einen Algorithmus
      void applyExampleAlgorithm();
      void setSlider1Value(int);
+     void setSlider2Value(int);
+     void setSlider3Value(int);
      void initDataTab2();
+     void automaticContrast();
      void changeDynamik(int);
      void confirmDynamik();
      void histogram();
@@ -127,7 +135,7 @@ protected:
     void plotO(int x,int y);
     void bresenham(int x0,int x1,int y0,int y1, int config); // config=0:red cross; config=1: origin
     std::string Int_to_String(int n);
-
+    void alert();
     void dynamic(int);
 
     // Ab hier technische Details die nicht für das Verständnis notwendig sind.
