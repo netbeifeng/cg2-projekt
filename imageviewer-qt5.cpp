@@ -56,6 +56,8 @@
 using namespace std;
 
 int spinbox1Value = 8;
+int spinbox2Value = 0;
+int spinbox3Value = 255;
 
 int slider1Value=10;
 int slider2Value=10;
@@ -184,6 +186,57 @@ void ImageViewer::setSlider3Value(int value) {
     if(image!=NULL) {
         slider3Value = value;
         label_contrast_value->setText(QString::number(value));
+
+        int cont = value;
+        QImage copie = originImage.copy();
+        unsigned int *img = (unsigned int *)image->bits();
+        {
+            int pixels = image->width() * image->height();
+            unsigned int *data = (unsigned int *)originImage.bits();
+
+            int red, green, blue, nRed, nGreen, nBlue;
+
+            if (cont > 0 && cont < 100)
+            {
+                float param = 1 / (1 - cont / 100.0) - 1;
+
+                for (int i = 0; i < pixels; ++i)
+                {
+                    nRed = qRed(data[i]);
+                    nGreen = qGreen(data[i]);
+                    nBlue = qBlue(data[i]);
+
+                    red = nRed + (nRed - 127) * param;
+                    red = (red < 0x00) ? 0x00 : (red > 0xff) ? 0xff : red;
+                    green = nGreen + (nGreen - 127) * param;
+                    green = (green < 0x00) ? 0x00 : (green > 0xff) ? 0xff : green;
+                    blue = nBlue + (nBlue - 127) * param;
+                    blue = (blue < 0x00) ? 0x00 : (blue > 0xff) ? 0xff : blue;
+
+                    img[i] = qRgba(red, green, blue, qAlpha(data[i]));
+                }
+            }
+            else
+            {
+                for (int i = 0; i < pixels; ++i)
+                {
+                    nRed = qRed(data[i]);
+                    nGreen = qGreen(data[i]);
+                    nBlue = qBlue(data[i]);
+
+                    red = nRed + (nRed - 127) * cont / 100.0;
+                    red = (red < 0x00) ? 0x00 : (red > 0xff) ? 0xff : red;
+                    green = nGreen + (nGreen - 127) * cont / 100.0;
+                    green = (green < 0x00) ? 0x00 : (green > 0xff) ? 0xff : green;
+                    blue = nBlue + (nBlue - 127) * cont / 100.0;
+                    blue = (blue < 0x00) ? 0x00 : (blue > 0xff) ? 0xff : blue;
+
+                    img[i] = qRgba(red, green, blue, qAlpha(data[i]));
+                }
+            }
+
+        }
+
         updateImageDisplay();
     } else {
         alert();
@@ -194,6 +247,24 @@ void ImageViewer::setSlider2Value(int value) {
     if(image!=NULL) {
         slider2Value = value;
         label_brightness_value->setText(QString::number(value));
+        int bri = value - avh;
+        int red, green, blue;
+        int pixels = image->width() * image->height();
+        QImage copie = originImage.copy();
+        unsigned int *data = (unsigned int *)copie.bits();
+        unsigned int *img = (unsigned int *)image->bits();
+
+        for (int i = 0; i < pixels; ++i)
+        {
+            red= qRed(data[i])+ bri;
+            red = (red < 0x00) ? 0x00 : (red > 0xff) ? 0xff : red;
+            green= qGreen(data[i]) + bri;
+            green = (green < 0x00) ? 0x00 : (green > 0xff) ? 0xff : green;
+            blue= qBlue(data[i]) + bri;
+            blue =  (blue  < 0x00) ? 0x00 : (blue  > 0xff) ? 0xff : blue ;
+            img[i] = qRgba(red, green, blue, qAlpha(data[i]));
+        }
+
         updateImageDisplay();
     } else {
         alert();
@@ -304,6 +375,18 @@ void ImageViewer::initDataTab2(){
 void ImageViewer::changeDynamik(int value){
     spinbox1Value = value;
     cout<<spinbox1Value<<endl;
+
+}
+
+void ImageViewer::changeSpinbox2(int value){
+    spinbox2Value = value;
+    cout<<spinbox2Value<<endl;
+}
+
+void ImageViewer::changeSpinbox3(int value){
+    spinbox3Value = value;
+    cout<<spinbox3Value<<endl;
+
 }
 
 void ImageViewer::histogram(){
@@ -374,7 +457,50 @@ void ImageViewer::confirmDynamik() {
 
 void ImageViewer::automaticContrast() {
     if(image!=NULL) {
-        updateImageDisplay();
+//      if(slider2Value>=slider3Value){
+//        alert();
+//      } else {
+          int aMin = spinbox2Value;
+          int aMax = spinbox3Value;
+          int w=image->width();
+          int h=image->height();
+          double aHigh = 0;
+          double aLow = 255;
+          QVector<double> vecY(256,0);
+          for(int i = 0; i < w; i++) {
+             for(int j = 0; j < h; j++) {
+                 int t = int(originImage.bits()[i*w + j]);
+                 if(t>aHigh){aHigh = t;}
+                 if(t<aLow){aLow = t;}
+             }
+          }
+
+          int red, green, blue;
+          QImage copie = originGrayImage.copy();
+          unsigned int *data = (unsigned int *)copie.bits();
+          unsigned int *data2 = (unsigned int *)originImage.bits();
+          unsigned int *img = (unsigned int *)image->bits();
+          int pixels = image->width() * image->height();
+          for(int k = 0; k < pixels; k++) {
+                int fa = 0;
+                int a = qRed(data[k]);
+                if(a<aMin){ fa=aMin;} else {
+                    if(a>aMax){ fa=aMax; } else {
+                        fa=aMin+(a-aLow)*((aMax-aMin)/(aHigh-aLow));
+                    }
+                }
+                int bri = fa-a;
+                red= qRed(data2[k])+ bri;
+                red = (red < 0x00) ? 0x00 : (red > 0xff) ? 0xff : red;
+                green= qGreen(data2[k]) + bri;
+                green = (green < 0x00) ? 0x00 : (green > 0xff) ? 0xff : green;
+                blue= qBlue(data2[k]) + bri;
+                blue =  (blue  < 0x00) ? 0x00 : (blue  > 0xff) ? 0xff : blue ;
+                img[k] = qRgba(red, green, blue, qAlpha(data2[k]));
+          }
+//      }
+
+      updateImageDisplay();
     } else {
         alert();
     }
@@ -457,7 +583,6 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addLayout(h_mv);
 
     m_option_layout2->addWidget(lineA);
-
     m_option_layout2->addLayout(m_change_dynamik);
     m_option_layout2->addWidget(lineB);
     QHBoxLayout* h_his = new QHBoxLayout();
@@ -517,9 +642,22 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addLayout(h_brightness);
     m_option_layout2->addLayout(h_contrast);
     m_option_layout2->addWidget(lineC);
-
+    spinbox2 = new QSpinBox(tabWidget);
+    spinbox2->setMaximum(255);
+    spinbox2->setMinimum(0);
+    spinbox2->setValue(0);
+    spinbox2->setMaximumWidth(200);
+    spinbox3 = new QSpinBox(tabWidget);
+    spinbox3->setMaximum(255);
+    spinbox3->setMinimum(0);
+    spinbox3->setValue(255);
+    spinbox3->setMaximumWidth(200);
     QPushButton* automatic_contrast_adjust = new QPushButton("Automatic Contrast Adjust");
+    QObject::connect(spinbox2, SIGNAL (valueChanged(int)), this, SLOT (changeSpinbox2(int)));
+    QObject::connect(spinbox3, SIGNAL (valueChanged(int)), this, SLOT (changeSpinbox3(int)));
     QObject::connect(automatic_contrast_adjust, SIGNAL (clicked()), this, SLOT (automaticContrast()));
+    m_option_layout2->addWidget(spinbox2);
+    m_option_layout2->addWidget(spinbox3);
     m_option_layout2->addWidget(automatic_contrast_adjust);
 //    m_option_layout2->addWidget(button3);
 
@@ -647,6 +785,15 @@ bool ImageViewer::loadFile(const QString &fileName)
             originGrayImage.setPixel(i,j,qRgb(gray,gray,gray));
         }
     }
+    QImage grayImage = image->convertToFormat(QImage::Format_Grayscale8);
+    for(int i=0;i<grayImage.height();i++){
+        for(int j=0;j<grayImage.width();j++){
+            avh=avh+qGray(grayImage.pixel(i,j));
+        }
+    }
+    avh =(avh*1.0)/(grayImage.width()*grayImage.height());
+    setSlider2Value(avh);
+
 
     if (image->isNull()) {
         QMessageBox::information(this, QGuiApplication::applicationDisplayName(),

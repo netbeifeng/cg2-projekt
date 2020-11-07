@@ -79,6 +79,8 @@ class ImageViewer : public QMainWindow
      QPushButton* button2;
      QPushButton* button3;
      QSpinBox* spinbox1;
+     QSpinBox* spinbox2;
+     QSpinBox* spinbox3;
      QSlider* slider1;
      QSlider* slider2;
      QSlider* slider3;
@@ -99,6 +101,8 @@ class ImageViewer : public QMainWindow
      void initDataTab2();
      void automaticContrast();
      void changeDynamik(int);
+     void changeSpinbox2(int);
+     void changeSpinbox3(int);
      void confirmDynamik();
      void histogram();
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
