@@ -2,7 +2,15 @@
 ### **DEADLINE: 2020.11.27**
 
 [academiccloud](https://sync.academiccloud.de/index.php/s/xmNafF5ZZqi5xVr)
+
 pw: wise_2021
+
+## Icon
+![Icon_Lena](./lenna.ico)
+
+## Test-Image
+![Lena](./lenna.jpg)
+
 
 # Exercises
 - [E1](https://github.com/netbeifeng/cg2-projekt/blob/master/CG2_Uebung_01.pdf)
