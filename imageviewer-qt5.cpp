@@ -350,7 +350,7 @@ void ImageViewer::setSliderFilterYSizeValue(int value) {
             label_size_filter_y->setText(QString::number(value));
             m_coefficients->setRowCount(value);
         } else {
-            label_size_filter_y->setText(QString("Not an even number"));
+            label_size_filter_y->setText(QString("Not an odd number"));
         }
     } else {
         alert();
@@ -364,7 +364,7 @@ void ImageViewer::setSliderFilterXSizeValue(int value) {
             label_size_filter_x->setText(QString::number(value));
             m_coefficients->setColumnCount(value);
         } else {
-            label_size_filter_x->setText(QString("Not an even number"));
+            label_size_filter_x->setText(QString("Not an odd number"));
         }
     } else {
         alert();
