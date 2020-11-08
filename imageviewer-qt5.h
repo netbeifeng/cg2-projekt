@@ -110,6 +110,7 @@ class ImageViewer : public QMainWindow
      void histogram();
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
+
      void open();
      void print();
      void zoomIn();
