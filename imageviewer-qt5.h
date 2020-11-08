@@ -118,11 +118,6 @@ class ImageViewer : public QMainWindow
      void fitToWindow();
      void about();
 
-
-    
-
-
-
 public:
      ImageViewer();
      bool loadFile(const QString &);
