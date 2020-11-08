@@ -59,9 +59,16 @@ int spinbox1Value = 8;
 int spinbox2Value = 0;
 int spinbox3Value = 255;
 
+
 int slider1Value=10;
 int slider2Value=10;
 int slider3Value=10;
+
+int x_filter_size = 1;
+int y_filter_size = 1;
+
+double spinboxDoubleValue = 0.5;
+
 int avh=0;
 int vari=0;
 QImage originImage;
@@ -337,6 +344,34 @@ void ImageViewer::setSlider1Value(int value){
 
 }
 
+void ImageViewer::setSliderFilterYSizeValue(int value) {
+    if(image!=NULL) {
+        if(value % 2 == 1) {
+            label_size_filter_y->setText(QString::number(value));
+            m_coefficients->setRowCount(value);
+        } else {
+            label_size_filter_y->setText(QString("Not an even number"));
+        }
+    } else {
+        alert();
+    }
+
+}
+
+void ImageViewer::setSliderFilterXSizeValue(int value) {
+    if(image!=NULL) {
+        if(value % 2 == 1) {
+            label_size_filter_x->setText(QString::number(value));
+            m_coefficients->setColumnCount(value);
+        } else {
+            label_size_filter_x->setText(QString("Not an even number"));
+        }
+    } else {
+        alert();
+    }
+
+}
+
 string ImageViewer::Int_to_String(int n){
     ostringstream stream;
     stream<<n;
@@ -529,6 +564,19 @@ void ImageViewer::generateControlPanels()
     lineC->setFrameShape(QFrame::HLine);
     lineC->setFrameShadow(QFrame::Sunken);
 
+
+    auto lineD = new QFrame;
+    lineD->setFrameShape(QFrame::HLine);
+    lineD->setFrameShadow(QFrame::Sunken);
+
+    auto lineF = new QFrame;
+    lineF->setFrameShape(QFrame::HLine);
+    lineF->setFrameShadow(QFrame::Sunken);
+
+    auto lineE = new QFrame;
+    lineE->setFrameShape(QFrame::HLine);
+    lineE->setFrameShadow(QFrame::Sunken);
+
     QFont ft;
     ft.setPointSize(10);
     QFont big_ft;
@@ -557,7 +605,6 @@ void ImageViewer::generateControlPanels()
 
 
     // uebung2
-
     m_option_panel2 = new QWidget();
 	m_option_layout2 = new QVBoxLayout();
     m_change_dynamik = new QHBoxLayout();
@@ -652,7 +699,7 @@ void ImageViewer::generateControlPanels()
 
     m_option_layout2->addLayout(h_brightness);
     m_option_layout2->addLayout(h_contrast);
-    m_option_layout2->addWidget(lineC);
+    m_option_layout2->addWidget(lineD);
 
     QHBoxLayout* h_low = new QHBoxLayout();
     QHBoxLayout* h_high = new QHBoxLayout();
@@ -687,7 +734,91 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addWidget(automatic_contrast_adjust);
 //    m_option_layout2->addWidget(button3);
 
+
     tabWidget->addTab(m_option_panel2,"Aufgabe 2");
+
+    m_option_panel3 = new QWidget();
+    m_option_layout3 = new QVBoxLayout();
+
+    QVBoxLayout* v_x_f_size = new QVBoxLayout();
+    QVBoxLayout* v_y_f_size = new QVBoxLayout();
+
+    QHBoxLayout* h_x_f_size = new QHBoxLayout();
+    QLabel* label_x_size = new QLabel("X-Filter Size:");
+    label_x_size->setFont(ft);
+    h_x_f_size->addWidget(label_x_size);
+    label_size_filter_x = new QLabel(QString::number(x_filter_size));
+    label_size_filter_x->setFont(ft);
+    h_x_f_size->addWidget(label_size_filter_x);
+
+    QHBoxLayout* h_y_f_size = new QHBoxLayout();
+    QLabel* label_y_size = new QLabel("Y-Filter Size:");
+    label_y_size->setFont(ft);
+    h_y_f_size->addWidget(label_y_size);
+    label_size_filter_y = new QLabel(QString::number(y_filter_size));
+    label_size_filter_y->setFont(ft);
+    h_y_f_size->addWidget(label_size_filter_y);
+
+    slider_size_x_filter = new QSlider(Qt::Horizontal);
+    slider_size_x_filter->setValue(1);
+
+    slider_size_x_filter->setTickInterval(2);
+    slider_size_x_filter->setRange(1,9);
+    slider_size_x_filter->setTickPosition(QSlider::TicksBothSides);
+    QObject::connect(slider_size_x_filter, SIGNAL (valueChanged(int)), this, SLOT (setSliderFilterXSizeValue(int)));
+
+    slider_size_y_filter = new QSlider(Qt::Horizontal);
+    slider_size_y_filter->setValue(1);
+    slider_size_y_filter->setTickInterval(2);
+    slider_size_y_filter->setRange(1,9);
+    slider_size_y_filter->setTickPosition(QSlider::TicksBothSides);
+    QObject::connect(slider_size_y_filter, SIGNAL (valueChanged(int)), this, SLOT (setSliderFilterYSizeValue(int)));
+
+    v_x_f_size->addLayout(h_x_f_size);
+    v_x_f_size->addWidget(slider_size_x_filter);
+
+    v_y_f_size->addLayout(h_y_f_size);
+    v_y_f_size->addWidget(slider_size_y_filter);
+
+    m_option_layout3->addLayout(v_x_f_size);
+    m_option_layout3->addLayout(v_y_f_size);
+
+    QVBoxLayout* v_c = new QVBoxLayout();
+
+    m_coefficients = new QTableWidget(1,1,this);
+//    m_coefficients->horizontalHeader()->setStretchLastSection(true);
+
+    m_option_layout3->addWidget(m_coefficients);
+    m_option_panel3->setLayout(m_option_layout3);
+    QLabel* label_coefficient = new QLabel("Coefficients:");
+    label_coefficient->setFont(ft);
+    v_c->addWidget(label_coefficient);
+    v_c->addWidget(m_coefficients);
+    button_filter_without_border = new QPushButton("Filter Without Border");
+    v_c->addWidget(button_filter_without_border);
+    m_option_layout3->addLayout(v_c);
+    m_option_layout3->addWidget(lineF);
+
+    button_filter_zero_padding = new QPushButton("Filter Zero-Padding");
+    button_filter_constant_border = new QPushButton("Filter Constant Border");
+    button_filter_mirror_border = new QPushButton("Filter Mirror Border");
+    button_filter_gauss = new QPushButton("Filter 2D-Gauss");
+
+    m_option_layout3->addWidget(button_filter_zero_padding);
+    m_option_layout3->addWidget(button_filter_constant_border);
+    m_option_layout3->addWidget(button_filter_mirror_border);
+    QHBoxLayout* h_filter_gauss = new QHBoxLayout();
+    QLabel* label_filter_gauss = new QLabel("σ for 2D-Gauss Filter:");
+    spinbox_filter_gauss = new QDoubleSpinBox();
+    spinbox_filter_gauss->setValue(spinboxDoubleValue);
+    h_filter_gauss->addWidget(label_filter_gauss);
+    h_filter_gauss->addWidget(spinbox_filter_gauss);
+
+    m_option_layout3->addWidget(lineE);
+    m_option_layout3->addLayout(h_filter_gauss);
+    m_option_layout3->addWidget(button_filter_gauss);
+
+    tabWidget->addTab(m_option_panel3,"Aufgabe 3");
 	tabWidget->show();
 	// Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen
 }

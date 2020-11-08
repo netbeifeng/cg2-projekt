@@ -60,6 +60,7 @@ class QTabWidget;
 class QPushButton;
 class QSpinBox;
 class QSlider;
+class QTableWidget;
 
 class ImageViewer : public QMainWindow
 {
@@ -81,19 +82,31 @@ class ImageViewer : public QMainWindow
      QPushButton* button1;
      QPushButton* button2;
      QPushButton* button3;
+
+     QPushButton* button_filter_without_border;
+     QPushButton* button_filter_zero_padding;
+     QPushButton* button_filter_constant_border;
+     QPushButton* button_filter_mirror_border;
+     QPushButton* button_filter_gauss;
+
      QSpinBox* spinbox1;
      QSpinBox* spinbox2;
      QSpinBox* spinbox3;
+     QDoubleSpinBox* spinbox_filter_gauss;
+
      QSlider* slider1;
      QSlider* slider2;
      QSlider* slider3;
+
+     QSlider* slider_size_x_filter;
+     QSlider* slider_size_y_filter;
 
      QLabel* label_contrast_value;
      QLabel* label_brightness_value;
      // hier können weitere GUI Objekte hin wie Buttons Slider etc. 
 
      QCustomPlot *m_histogram;
-
+     QTableWidget* m_coefficients;
  private slots:
 
      // Beispiel für einen Algorithmus
@@ -108,6 +121,8 @@ class ImageViewer : public QMainWindow
      void changeSpinbox3(int);
      void confirmDynamik();
      void histogram();
+     void setSliderFilterYSizeValue(int);
+     void setSliderFilterXSizeValue(int);
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
 
@@ -157,6 +172,10 @@ protected:
     QWidget* centralwidget;
     QLabel* imageLabel;
     QLabel* HV;
+
+    QLabel* label_size_filter_x;
+    QLabel* label_size_filter_y;
+
     QScrollArea* scrollArea;
     double scaleFactor;
     QImage* image;
