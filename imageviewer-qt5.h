@@ -75,6 +75,9 @@ class ImageViewer : public QMainWindow
      QWidget*	m_option_panel2;
      QVBoxLayout*    m_option_layout2;
 
+     QWidget* m_option_panel3;
+     QVBoxLayout*    m_option_layout3;
+
      QPushButton* button1;
      QPushButton* button2;
      QPushButton* button3;

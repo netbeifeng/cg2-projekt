@@ -186,7 +186,8 @@ void ImageViewer::setSlider3Value(int value) {
     if(image!=NULL) {
         slider3Value = value;
         label_contrast_value->setText(QString::number(value));
-
+        button2->click();
+        button3->click();
         int cont = value;
         QImage copie = originImage.copy();
         unsigned int *img = (unsigned int *)image->bits();
@@ -246,7 +247,11 @@ void ImageViewer::setSlider3Value(int value) {
 void ImageViewer::setSlider2Value(int value) {
     if(image!=NULL) {
         slider2Value = value;
+        slider2->setValue(value);
+        button2->click();
+        button3->click();
         label_brightness_value->setText(QString::number(value));
+
         int bri = value - avh;
         int red, green, blue;
         int pixels = image->width() * image->height();
@@ -277,6 +282,8 @@ void ImageViewer::setSlider1Value(int value){
     if(image!=NULL){
      int w=image->width();
      int h=image->height();
+     button2->click();
+     button3->click();
      //set it back to origin* status
      //bresenham(0,w,0,h,1);
 
@@ -464,6 +471,8 @@ void ImageViewer::automaticContrast() {
           int aMax = spinbox3Value;
           int w=image->width();
           int h=image->height();
+          button2->click();
+          button3->click();
           double aHigh = 0;
           double aLow = 255;
           QVector<double> vecY(256,0);
@@ -522,6 +531,8 @@ void ImageViewer::generateControlPanels()
 
     QFont ft;
     ft.setPointSize(10);
+    QFont big_ft;
+    big_ft.setPointSize(14);
     // uebung1
 
     m_option_panel1 = new QWidget();
@@ -642,22 +653,37 @@ void ImageViewer::generateControlPanels()
     m_option_layout2->addLayout(h_brightness);
     m_option_layout2->addLayout(h_contrast);
     m_option_layout2->addWidget(lineC);
+
+    QHBoxLayout* h_low = new QHBoxLayout();
+    QHBoxLayout* h_high = new QHBoxLayout();
+    QLabel* low = new QLabel("a<sub>low</sub>");
+    low->setFont(big_ft);
+
+    QLabel* high = new QLabel("a<sub>high</sub>");
+    high->setFont(big_ft);
+
     spinbox2 = new QSpinBox(tabWidget);
     spinbox2->setMaximum(255);
     spinbox2->setMinimum(0);
     spinbox2->setValue(0);
     spinbox2->setMaximumWidth(200);
+    h_low->addWidget(low);
+    h_low->addWidget(spinbox2);
+
     spinbox3 = new QSpinBox(tabWidget);
     spinbox3->setMaximum(255);
     spinbox3->setMinimum(0);
     spinbox3->setValue(255);
     spinbox3->setMaximumWidth(200);
+    h_high->addWidget(high);
+    h_high->addWidget(spinbox3);
+
     QPushButton* automatic_contrast_adjust = new QPushButton("Automatic Contrast Adjust");
     QObject::connect(spinbox2, SIGNAL (valueChanged(int)), this, SLOT (changeSpinbox2(int)));
     QObject::connect(spinbox3, SIGNAL (valueChanged(int)), this, SLOT (changeSpinbox3(int)));
     QObject::connect(automatic_contrast_adjust, SIGNAL (clicked()), this, SLOT (automaticContrast()));
-    m_option_layout2->addWidget(spinbox2);
-    m_option_layout2->addWidget(spinbox3);
+    m_option_layout2->addLayout(h_low);
+    m_option_layout2->addLayout(h_high);
     m_option_layout2->addWidget(automatic_contrast_adjust);
 //    m_option_layout2->addWidget(button3);
 
