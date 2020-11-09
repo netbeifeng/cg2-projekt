@@ -38,6 +38,7 @@
 **
 ****************************************************************************/
 
+#include <Eigen>
 #include <QtWidgets>
 #ifndef QT_NO_PRINTER
 #include <QPrintDialog>
@@ -91,7 +92,6 @@ ImageViewer::ImageViewer()
     	createMenus();
 
     	resize(QGuiApplication::primaryScreen()->availableSize() * 0.85 );
-
 }
 
 void ImageViewer::applyExampleAlgorithm()
