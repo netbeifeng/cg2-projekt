@@ -1,7 +1,7 @@
 QT += core
 QT += widgets
 qtHaveModule(printsupport): QT += printsupport
-
+INCLUDEPATH+= .\eigen\eigen
 HEADERS       = imageviewer-qt5.h \
                 qcustomplot.h
 SOURCES       = imageviewer-qt5.cpp \
