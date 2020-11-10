@@ -133,6 +133,11 @@ class ImageViewer : public QMainWindow
      void normalSize();
      void fitToWindow();
      void about();
+     void button_without_border();
+     void button_zero_padding();
+     void button_constant_border();
+     void button_mirror_border();
+     void button_gauss();
 
 public:
      ImageViewer();

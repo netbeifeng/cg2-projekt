@@ -795,14 +795,19 @@ void ImageViewer::generateControlPanels()
     v_c->addWidget(label_coefficient);
     v_c->addWidget(m_coefficients);
     button_filter_without_border = new QPushButton("Filter Without Border");
+    QObject::connect(button_filter_without_border, SIGNAL (clicked()), this, SLOT (button_without_border()));
     v_c->addWidget(button_filter_without_border);
     m_option_layout3->addLayout(v_c);
     m_option_layout3->addWidget(lineF);
 
     button_filter_zero_padding = new QPushButton("Filter Zero-Padding");
+    QObject::connect(button_filter_zero_padding, SIGNAL (clicked()), this, SLOT (button_zero_padding()));
     button_filter_constant_border = new QPushButton("Filter Constant Border");
+    QObject::connect(button_filter_constant_border, SIGNAL (clicked()), this, SLOT (button_constant_border()));
     button_filter_mirror_border = new QPushButton("Filter Mirror Border");
+    QObject::connect(button_filter_mirror_border, SIGNAL (clicked()), this, SLOT (button_mirror_border()));
     button_filter_gauss = new QPushButton("Filter 2D-Gauss");
+    QObject::connect(button_filter_gauss, SIGNAL (clicked()), this, SLOT (button_gauss()));
 
     m_option_layout3->addWidget(button_filter_zero_padding);
     m_option_layout3->addWidget(button_filter_constant_border);
