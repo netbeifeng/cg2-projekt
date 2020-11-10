@@ -283,6 +283,46 @@ void ImageViewer::setSlider2Value(int value) {
     }
 }
 
+void ImageViewer::button_without_border() {
+    if(image!=NULL) {
+
+    } else {
+        alert();
+    }
+}
+
+void ImageViewer::button_zero_padding() {
+    if(image!=NULL) {
+
+    } else {
+        alert();
+    }
+}
+
+void ImageViewer::button_constant_border() {
+    if(image!=NULL) {
+
+    } else {
+        alert();
+    }
+}
+
+void ImageViewer::button_mirror_border() {
+    if(image!=NULL) {
+
+    } else {
+        alert();
+    }
+}
+
+void ImageViewer::button_gauss() {
+    if(image!=NULL) {
+
+    } else {
+        alert();
+    }
+}
+
 void ImageViewer::setSlider1Value(int value){
     slider1Value = value;
     std::cout<<slider1Value<<std::endl;
