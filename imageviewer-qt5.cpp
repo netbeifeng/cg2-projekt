@@ -316,104 +316,114 @@ void ImageViewer::readAndParCoTable()
 
     int	x	= slider_size_x_filter->value();
     int	y	= slider_size_y_filter->value();
-    //cout<<"x:"<<x<<endl<<"y:"<<y<<endl;
-    m_coefficients->setRowCount( y );
-    m_coefficients->setColumnCount( x );
-    cout<<"row:"<<m_coefficients->rowCount()<<endl;
-    double	sum	= 0;
-    for ( int i = 0; i < x; i++ )
-    {
-        for ( int j = 0; j < y; j++ )
+
+        cout<<"x:"<<x<<endl<<"y:"<<y<<endl;
+        m_coefficients->setRowCount( y );
+        m_coefficients->setColumnCount( x );
+        cout<<"row:"<<m_coefficients->rowCount()<<endl;
+        double	sum	= 0;
+        for ( int i = 0; i < x; i++ )
         {
-            if(m_coefficients->item(i,j)!=NULL){
-                double v = m_coefficients->item( i, j )->text().toDouble();
-                sum += v;
-            } else {
-                //cout<<i<<"---"<<j<<"---error---"<<endl;
+            for ( int j = 0; j < y; j++ )
+            {
+                if(m_coefficients->item(j,i)!=NULL){
+                    double v = m_coefficients->item( j, i )->text().toDouble();
+                    cout<<m_coefficients->item( j, i )->text().toUtf8().constData()<<endl;
+                    sum += v;
+                } else {
+                    //cout<<i<<"---"<<j<<"---error---"<<endl;
+                }
             }
         }
-    }
 
-    cout<<"sum:"<<sum<<endl;
+        cout<<"sum:"<<sum<<endl;
 
-    for ( int i = 0; i < x; i++ )
-    {
-        for ( int j = 0; j < y; j++ )
+        for ( int i = 0; i < x; i++ )
         {
-            if(m_coefficients->item(i,j)!=NULL){
-              double v = m_coefficients->item( i, j )->text().toDouble() / sum;
-              cout<<"value of v:"<<v<<endl;
-              coe.push_back( v );
-            } else {
-                cout<<i<<"---"<<j<<"---error2---"<<endl;
-                coe.push_back( (double)0 );
+            for ( int j = 0; j < y; j++ )
+            {
+                if(m_coefficients->item(j,i)!=NULL){
+                  double v = m_coefficients->item( j, i )->text().toDouble() / sum;
+                  cout<<"value of v:"<<v<<endl;
+                  coe.push_back( v );
+                } else {
+                    cout<<i<<"---"<<j<<"---error2---"<<endl;
+                    coe.push_back( (double)0 );
+                }
             }
         }
-    }
+
+
 }
 
 void ImageViewer::button_without_border()
 {
     if ( image != NULL )
     {
-        readAndParCoTable();
-        for (auto iter = coe.cbegin(); iter != coe.cend(); iter++)
-        {
-            cout << (*iter) << endl;
-        }
-        int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
-        int	y	= (slider_size_y_filter->value() - 1) / 2;
-        int	fy	= 2 * y + 1;
-        //cout<<"fy"<<fy<<endl;
-        int	w	= image->width();
-        int	h	= image->height();
-
-        for ( int i = 0; i < w; i++ )
-        {
-            for ( int j = 0; j < h; j++ )                                                                  /* pixel loop */
+        int	_x	= slider_size_x_filter->value();
+        int	_y	= slider_size_y_filter->value();
+        if(_x % 2 == 0 || _y == 0) {
+            QMessageBox::information( this, QString::fromLocal8Bit( "Error" ), QString::fromLocal8Bit( "X and Y must be odd number!" ) );
+        } else {
+            readAndParCoTable();
+            for (auto iter = coe.cbegin(); iter != coe.cend(); iter++)
             {
-                //cout<<"i-x:"<<i-x<<endl;
-                //cout<<"j-y:"<<j-y<<endl;
+                cout << (*iter) << endl;
+            }
+            int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
+            int	y	= (slider_size_y_filter->value() - 1) / 2;
+            int	fy	= 2 * y + 1;
+            //cout<<"fy"<<fy<<endl;
+            int	w	= image->width();
+            int	h	= image->height();
 
-                if ( ( (i - x) < 0) && ( (j - y) < 0) )                                                 /* left-top */
-                { /* mach nichts hier */ //cout<<"lt"<<endl;
-                } if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
-                { /* mach nichts hier */ //cout<<"lb"<<endl;
-                } if ( ( (i - x) < 0) && ( (j + y) > h) )                                          /* left-bottom */
-                { /* mach nichts hier */ //cout<<"lbb"<<endl;
-                } if ( ( (i + x) > w) && ( (j - y) < 0) )                                          /* right-top */
-                { /* mach nichts hier */ //cout<<"rt"<<endl;
-                } if ( ( (i + x) > w) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* right-border */
-                { /* mach nichts hier */ //cout<<"rb"<<endl;
-                } if ( ( (i + x) > w) && ( (j + y) > h) )                                          /* right-bottom */
-                { /* mach nichts hier */ //cout<<"rbb"<<endl;
-                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) < 0) )                      /* top-border */
-                { /* mach nichts hier */ //cout<<"tb"<<endl;
-                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j + y) > h) )                      /* bottom-border */
-                { /* mach nichts hier */ //cout<<"bb"<<endl;
-                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) >= 0) && ( (j + y) <= h) )  /* inside of image */
+            for ( int i = 0; i < w; i++ )
+            {
+                for ( int j = 0; j < h; j++ )                                                                  /* pixel loop */
                 {
-                    /* image->setPixel(i,j,qRgb(0,0,0)); */
-                    double	r	= 0;
-                    double	g	= 0;
-                    double	b	= 0;
-                    for ( int filterx = -x; filterx <= x; filterx++ )
+                    //cout<<"i-x:"<<i-x<<endl;
+                    //cout<<"j-y:"<<j-y<<endl;
+
+                    if ( ( (i - x) < 0) && ( (j - y) < 0) )                                                 /* left-top */
+                    { /* mach nichts hier */ //cout<<"lt"<<endl;
+                    } if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
+                    { /* mach nichts hier */ //cout<<"lb"<<endl;
+                    } if ( ( (i - x) < 0) && ( (j + y) > h) )                                          /* left-bottom */
+                    { /* mach nichts hier */ //cout<<"lbb"<<endl;
+                    } if ( ( (i + x) > w) && ( (j - y) < 0) )                                          /* right-top */
+                    { /* mach nichts hier */ //cout<<"rt"<<endl;
+                    } if ( ( (i + x) > w) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* right-border */
+                    { /* mach nichts hier */ //cout<<"rb"<<endl;
+                    } if ( ( (i + x) > w) && ( (j + y) > h) )                                          /* right-bottom */
+                    { /* mach nichts hier */ //cout<<"rbb"<<endl;
+                    } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) < 0) )                      /* top-border */
+                    { /* mach nichts hier */ //cout<<"tb"<<endl;
+                    } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j + y) > h) )                      /* bottom-border */
+                    { /* mach nichts hier */ //cout<<"bb"<<endl;
+                    } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) >= 0) && ( (j + y) <= h) )  /* inside of image */
                     {
-                        for ( int filtery = -y; filtery <= y; filtery++ )
+                        /* image->setPixel(i,j,qRgb(0,0,0)); */
+                        double	r	= 0;
+                        double	g	= 0;
+                        double	b	= 0;
+                        for ( int filterx = -x; filterx <= x; filterx++ )
                         {
-                            int	index	= (filtery + y) + (filterx + x) * fy;
-                            double	ws	= coe[ index ];
-                            r	+= originImage.pixelColor( i, j ).red() * ws;
-                            //cout<<r<<endl;
-                            g	+= originImage.pixelColor( i, j ).green() * ws;
-                            b	+= originImage.pixelColor( i, j ).blue() * ws;
+                            for ( int filtery = -y; filtery <= y; filtery++ )
+                            {
+                                int	index	= (filtery + y) + (filterx + x) * fy;
+                                double	ws	= coe[ index ];
+                                r	+= originImage.pixelColor( i, j ).red() * ws;
+                                //cout<<r<<endl;
+                                g	+= originImage.pixelColor( i, j ).green() * ws;
+                                b	+= originImage.pixelColor( i, j ).blue() * ws;
+                            }
                         }
+                        image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
                     }
-                    image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
                 }
             }
+            updateImageDisplay();
         }
-        updateImageDisplay();
     } else {
         alert();
     }
@@ -543,7 +553,7 @@ void ImageViewer::setSliderFilterYSizeValue( int value )
             label_size_filter_y->setText( QString::number( value ) );
             m_coefficients->setRowCount( value );
         } else {
-            label_size_filter_y->setText( QString( "Not an even number" ) );
+            label_size_filter_y->setText( QString( "Not an odd number" ) );
         }
     } else {
         alert();
@@ -560,7 +570,7 @@ void ImageViewer::setSliderFilterXSizeValue( int value )
             label_size_filter_x->setText( QString::number( value ) );
             m_coefficients->setColumnCount( value );
         } else {
-            label_size_filter_x->setText( QString( "Not an even number" ) );
+            label_size_filter_x->setText( QString( "Not an odd number" ) );
         }
     } else {
         alert();
