@@ -72,7 +72,7 @@ double spinboxDoubleValue = 0.5;
 
 int		avh	= 0;
 int		vari	= 0;
-vector<int>	coe;
+vector<double>	coe;
 QImage		originImage;
 QImage		originGrayImage;
 
@@ -313,38 +313,13 @@ void ImageViewer::setSlider2Value( int value )
 void ImageViewer::readAndParCoTable()
 {
     coe.clear();
-    int	x	= slider_size_x_filter->value();
-    int	y	= slider_size_y_filter->value();
-    double	sum	= 0;
-    for ( int i = 0; i < x; i++ )
-    {
-        for ( int j = 0; j < y; j++ )
-        {
-            if(m_coefficients->itemAt(i,j)!=NULL){
-                double v = m_coefficients->itemAt( i, j )->text().toDouble();
-                cout<<"value V:" << v << endl;
-                sum += v;
-            }
-        }
-    }
-    cout<<"sum:"<<sum<<endl;
-    for ( int i = 0; i < x; i++ )
-    {
-        for ( int j = 0; j < y; j++ )
-        {
-            if(m_coefficients->itemAt(i,j)!=NULL){
-              double v = m_coefficients->itemAt( i, j )->text().toDouble() / sum;
-              coe.push_back( v );
-            }
-        }
-    }
-}
 
-void ImageViewer::button_without_border()
-{
-    coe.clear();
     int	x	= slider_size_x_filter->value();
     int	y	= slider_size_y_filter->value();
+    //cout<<"x:"<<x<<endl<<"y:"<<y<<endl;
+    m_coefficients->setRowCount( y );
+    m_coefficients->setColumnCount( x );
+    cout<<"row:"<<m_coefficients->rowCount()<<endl;
     double	sum	= 0;
     for ( int i = 0; i < x; i++ )
     {
@@ -354,73 +329,90 @@ void ImageViewer::button_without_border()
                 double v = m_coefficients->item( i, j )->text().toDouble();
                 sum += v;
             } else {
-                cout<<i<<"---"<<j<<"---error---"<<endl;
+                //cout<<i<<"---"<<j<<"---error---"<<endl;
             }
         }
     }
+
     cout<<"sum:"<<sum<<endl;
+
     for ( int i = 0; i < x; i++ )
     {
         for ( int j = 0; j < y; j++ )
         {
             if(m_coefficients->item(i,j)!=NULL){
               double v = m_coefficients->item( i, j )->text().toDouble() / sum;
+              cout<<"value of v:"<<v<<endl;
               coe.push_back( v );
+            } else {
+                cout<<i<<"---"<<j<<"---error2---"<<endl;
+                coe.push_back( (double)0 );
             }
         }
     }
+}
+
+void ImageViewer::button_without_border()
+{
     if ( image != NULL )
     {
         readAndParCoTable();
+        for (auto iter = coe.cbegin(); iter != coe.cend(); iter++)
+        {
+            cout << (*iter) << endl;
+        }
         int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
         int	y	= (slider_size_y_filter->value() - 1) / 2;
-        int	fx	= 2 * x + 1;
         int	fy	= 2 * y + 1;
+        //cout<<"fy"<<fy<<endl;
         int	w	= image->width();
         int	h	= image->height();
 
-//        for ( int i = 0; i < w; i++ )
-//        {
-//            for ( int j = 0; j < h; j++ )                                                                  /* pixel loop */
-//            {
-//                if ( ( (i - x) < 0) && ( (j - y) < 0) )                                                 /* left-top */
-//                { /* mach nichts hier */ cout<<"lt"<<endl;
-//                } else if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
-//                { /* mach nichts hier */ //cout<<"lb"<<endl;
-//                } else if ( ( (i - x) < 0) && ( (j + y) > h) )                                          /* left-bottom */
-//                { /* mach nichts hier */ //cout<<"lbb"<<endl;
-//                } else if ( ( (i + x) > w) && ( (j - y) < 0) )                                          /* right-top */
-//                { /* mach nichts hier */ //cout<<"rt"<<endl;
-//                } else if ( ( (i + x) > w) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* right-border */
-//                { /* mach nichts hier */ //cout<<"rb"<<endl;
-//                } else if ( ( (i + x) > w) && ( (j + y) > h) )                                          /* right-bottom */
-//                { /* mach nichts hier */ //cout<<"rbb"<<endl;
-//                } else if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) < 0) )                      /* top-border */
-//                { /* mach nichts hier */ //cout<<"tb"<<endl;
-//                } else if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j + y) > h) )                      /* bottom-border */
-//                { /* mach nichts hier */ //cout<<"bb"<<endl;
-//                } else if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) >= 0) && ( (j + y) <= h) )  /* inside of image */
-//                { /* double vop  = 0; //value of pixel */
-//                    /* image->setPixel(i,j,qRgb(0,0,0)); */
-//                    double	r	= 0;
-//                    double	g	= 0;
-//                    double	b	= 0;
-//                    for ( int filterx = -x; filterx <= x; filterx++ )
-//                    {
-//                        for ( int filtery = -y; filtery <= y; filtery++ )
-//                        {
-//                            int	index	= (filtery + y) + (filterx + x) * fy;
-//                            double	ws	= coe[ index ];
-//                            //cout << index << endl;
-//                            r	+= originImage.pixelColor( i, j ).red() * ws;
-//                            g	+= originImage.pixelColor( i, j ).green() * ws;
-//                            b	+= originImage.pixelColor( i, j ).blue() * ws;
-//                        }
-//                    }
-//                    image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
-//                }
-//            }
-//        }
+        for ( int i = 0; i < w; i++ )
+        {
+            for ( int j = 0; j < h; j++ )                                                                  /* pixel loop */
+            {
+                //cout<<"i-x:"<<i-x<<endl;
+                //cout<<"j-y:"<<j-y<<endl;
+
+                if ( ( (i - x) < 0) && ( (j - y) < 0) )                                                 /* left-top */
+                { /* mach nichts hier */ //cout<<"lt"<<endl;
+                } if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
+                { /* mach nichts hier */ //cout<<"lb"<<endl;
+                } if ( ( (i - x) < 0) && ( (j + y) > h) )                                          /* left-bottom */
+                { /* mach nichts hier */ //cout<<"lbb"<<endl;
+                } if ( ( (i + x) > w) && ( (j - y) < 0) )                                          /* right-top */
+                { /* mach nichts hier */ //cout<<"rt"<<endl;
+                } if ( ( (i + x) > w) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* right-border */
+                { /* mach nichts hier */ //cout<<"rb"<<endl;
+                } if ( ( (i + x) > w) && ( (j + y) > h) )                                          /* right-bottom */
+                { /* mach nichts hier */ //cout<<"rbb"<<endl;
+                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) < 0) )                      /* top-border */
+                { /* mach nichts hier */ //cout<<"tb"<<endl;
+                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j + y) > h) )                      /* bottom-border */
+                { /* mach nichts hier */ //cout<<"bb"<<endl;
+                } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) >= 0) && ( (j + y) <= h) )  /* inside of image */
+                {
+                    /* image->setPixel(i,j,qRgb(0,0,0)); */
+                    double	r	= 0;
+                    double	g	= 0;
+                    double	b	= 0;
+                    for ( int filterx = -x; filterx <= x; filterx++ )
+                    {
+                        for ( int filtery = -y; filtery <= y; filtery++ )
+                        {
+                            int	index	= (filtery + y) + (filterx + x) * fy;
+                            double	ws	= coe[ index ];
+                            r	+= originImage.pixelColor( i, j ).red() * ws;
+                            //cout<<r<<endl;
+                            g	+= originImage.pixelColor( i, j ).green() * ws;
+                            b	+= originImage.pixelColor( i, j ).blue() * ws;
+                        }
+                    }
+                    image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
+                }
+            }
+        }
         updateImageDisplay();
     } else {
         alert();
