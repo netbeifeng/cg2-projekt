@@ -143,7 +143,7 @@ public:
      ImageViewer();
      bool loadFile(const QString &);
      void updateImageDisplay();
-
+     void readAndParCoTable();
 protected:
 
     void resizeEvent(QResizeEvent * event);
