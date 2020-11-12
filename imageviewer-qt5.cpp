@@ -1,3 +1,4 @@
+
 /****************************************************************************
 **
 ** Copyright (C) 2015 The Qt Company Ltd.
@@ -38,7 +39,6 @@
 **
 ****************************************************************************/
 #include <vector>
-#include <Eigen>
 #include <QtWidgets>
 #ifndef QT_NO_PRINTER
 #include <QPrintDialog>
@@ -317,10 +317,8 @@ void ImageViewer::readAndParCoTable()
     int	x	= slider_size_x_filter->value();
     int	y	= slider_size_y_filter->value();
 
-        cout<<"x:"<<x<<endl<<"y:"<<y<<endl;
         m_coefficients->setRowCount( y );
         m_coefficients->setColumnCount( x );
-        cout<<"row:"<<m_coefficients->rowCount()<<endl;
         double	sum	= 0;
         for ( int i = 0; i < x; i++ )
         {
@@ -328,7 +326,7 @@ void ImageViewer::readAndParCoTable()
             {
                 if(m_coefficients->item(j,i)!=NULL){
                     double v = m_coefficients->item( j, i )->text().toDouble();
-                    cout<<m_coefficients->item( j, i )->text().toUtf8().constData()<<endl;
+                    //cout<<m_coefficients->item( j, i )->text().toUtf8().constData()<<endl;
                     sum += v;
                 } else {
                     //cout<<i<<"---"<<j<<"---error---"<<endl;
@@ -336,7 +334,7 @@ void ImageViewer::readAndParCoTable()
             }
         }
 
-        cout<<"sum:"<<sum<<endl;
+        //cout<<"sum:"<<sum<<endl;
 
         for ( int i = 0; i < x; i++ )
         {
@@ -344,10 +342,10 @@ void ImageViewer::readAndParCoTable()
             {
                 if(m_coefficients->item(j,i)!=NULL){
                   double v = m_coefficients->item( j, i )->text().toDouble() / sum;
-                  cout<<"value of v:"<<v<<endl;
+                 // cout<<"value of v:"<<v<<endl;
                   coe.push_back( v );
                 } else {
-                    cout<<i<<"---"<<j<<"---error2---"<<endl;
+                   // cout<<i<<"---"<<j<<"---error2---"<<endl;
                     coe.push_back( (double)0 );
                 }
             }
@@ -374,8 +372,8 @@ void ImageViewer::button_without_border()
             int	y	= (slider_size_y_filter->value() - 1) / 2;
             int	fy	= 2 * y + 1;
             //cout<<"fy"<<fy<<endl;
-            int	w	= image->width();
-            int	h	= image->height();
+            int	w	= image->width()-1;
+            int	h	= image->height()-1;
 
             for ( int i = 0; i < w; i++ )
             {
@@ -384,7 +382,7 @@ void ImageViewer::button_without_border()
                     //cout<<"i-x:"<<i-x<<endl;
                     //cout<<"j-y:"<<j-y<<endl;
 
-                    if ( ( (i - x) < 0) && ( (j - y) < 0) )                                                 /* left-top */
+                    if ( ( (i - x) < 0) && ( (j - y) < 0) )                                            /* left-top */
                     { /* mach nichts hier */ //cout<<"lt"<<endl;
                     } if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
                     { /* mach nichts hier */ //cout<<"lb"<<endl;
@@ -402,22 +400,24 @@ void ImageViewer::button_without_border()
                     { /* mach nichts hier */ //cout<<"bb"<<endl;
                     } if ( ( (i + x) <= w) && ( (i - x) >= 0) && ( (j - y) >= 0) && ( (j + y) <= h) )  /* inside of image */
                     {
-                        /* image->setPixel(i,j,qRgb(0,0,0)); */
                         double	r	= 0;
                         double	g	= 0;
                         double	b	= 0;
+
                         for ( int filterx = -x; filterx <= x; filterx++ )
                         {
                             for ( int filtery = -y; filtery <= y; filtery++ )
                             {
                                 int	index	= (filtery + y) + (filterx + x) * fy;
                                 double	ws	= coe[ index ];
-                                r	+= originImage.pixelColor( i, j ).red() * ws;
-                                //cout<<r<<endl;
-                                g	+= originImage.pixelColor( i, j ).green() * ws;
-                                b	+= originImage.pixelColor( i, j ).blue() * ws;
+                                r	+= originImage.pixelColor( i+filterx, j+filtery ).red() * ws;
+                                g	+= originImage.pixelColor( i+filterx, j+filtery ).green() * ws;
+                                b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
                             }
                         }
+//                        if(i==200 && j == 100){
+//                            cout<<"or:"<<originImage.pixelColor(i,j).red()<<endl<<r<<endl;
+//                        }
                         image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
                     }
                 }
@@ -434,6 +434,51 @@ void ImageViewer::button_zero_padding()
 {
     if ( image != NULL )
     {
+        int	_x	= slider_size_x_filter->value();
+        int	_y	= slider_size_y_filter->value();
+        if(_x % 2 == 0 || _y == 0) {
+            QMessageBox::information( this, QString::fromLocal8Bit( "Error" ), QString::fromLocal8Bit( "X and Y must be odd number!" ) );
+        } else {
+            readAndParCoTable();
+            for (auto iter = coe.cbegin(); iter != coe.cend(); iter++)
+            {
+                cout << (*iter) << endl;
+            }
+            int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
+            int	y	= (slider_size_y_filter->value() - 1) / 2;
+            int	fy	= 2 * y + 1;
+
+            //cout<<"fy"<<fy<<endl;
+            int	w	= image->width()-1;
+            int	h	= image->height()-1;
+
+            for ( int i = 0; i <= w; i++ )
+            {
+                for ( int j = 0; j <= h; j++ )                                                                  /* pixel loop */
+                {
+                        double	r	= 0;
+                        double	g	= 0;
+                        double	b	= 0;
+                        for ( int filterx = -x; filterx <= x; filterx++ )
+                        {
+                            for ( int filtery = -y; filtery <= y; filtery++ )
+                            {
+                                int	index	= (filtery + y) + (filterx + x) * fy;
+                                double	ws	= coe[ index ];
+                                if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) >= 0) && ( (j + filtery) <= h) ){
+                                    r	+= originImage.pixelColor( i+filterx, j+filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( i+filterx, j+filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
+                                } else { // color = color + 0
+
+                                }
+                            }
+                        }
+                        image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
+                 }
+             }
+            updateImageDisplay();
+        }
     } else {
         alert();
     }
@@ -444,6 +489,75 @@ void ImageViewer::button_constant_border()
 {
     if ( image != NULL )
     {
+        cout<<"log"<<endl;
+        int	_x	= slider_size_x_filter->value();
+        int	_y	= slider_size_y_filter->value();
+        if(_x % 2 == 0 || _y == 0) {
+            QMessageBox::information( this, QString::fromLocal8Bit( "Error" ), QString::fromLocal8Bit( "X and Y must be odd number!" ) );
+        } else {
+            readAndParCoTable();
+            int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
+            int	y	= (slider_size_y_filter->value() - 1) / 2;
+            int	fy	= 2 * y + 1;
+            int	w	= image->width()-1;
+            int	h	= image->height()-1;
+            for ( int i = 0; i <= w; i++ )
+            {
+                for ( int j = 0; j <= h; j++ )                                                                  /* pixel loop */
+                {
+                        double	r	= 0;
+                        double	g	= 0;
+                        double	b	= 0;
+                        for ( int filterx = -x; filterx <= x; filterx++ )
+                        {
+                            for ( int filtery = -y; filtery <= y; filtery++ )
+                            {
+                                int	index	= (filtery + y) + (filterx + x) * fy;
+                                double	ws	= coe[ index ];
+                                if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) >= 0) && ( (j + filtery) <= h) ){
+                                    r	+= originImage.pixelColor( i+filterx, j+filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( i+filterx, j+filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) < 0) && ( (j + filtery) < 0) ){         // left-top
+                                    r	+= originImage.pixelColor( 0,0 ).red() * ws;
+                                    g	+= originImage.pixelColor( 0,0 ).green() * ws;
+                                    b	+= originImage.pixelColor( 0,0 ).blue() * ws;
+                                } else if( ( (i + filterx) > w) && ( (j + filtery) < 0) ){          // right-top
+                                    r	+= originImage.pixelColor( w,0 ).red() * ws;
+                                    g	+= originImage.pixelColor( w,0 ).green() * ws;
+                                    b	+= originImage.pixelColor( w,0 ).blue() * ws;
+                                } else if ( ( (i + filterx) < 0) && ( (j + filtery) > h) ){         // left-bottom
+                                    r	+= originImage.pixelColor( 0,h ).red() * ws;
+                                    g	+= originImage.pixelColor( 0,h ).green() * ws;
+                                    b	+= originImage.pixelColor( 0,h ).blue() * ws;
+                                } else if ( ( (i + filterx) > w) && ( (j + filtery) > h) ){   // right-bottom
+                                    r	+= originImage.pixelColor( w,h ).red() * ws;
+                                    g	+= originImage.pixelColor( w,h ).green() * ws;
+                                    b	+= originImage.pixelColor( w,h ).blue() * ws;
+                                } else if (( (i + filterx) < 0) && ( (j + filtery) >= 0) && ( (j + filtery) <= h)) { // left-border
+                                    r	+= originImage.pixelColor( 0,j + filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( 0,j + filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( 0,j + filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) > w) && ( (j + filtery) >= 0) && ( (j + filtery) <= h) ) { // right-border
+                                    r	+= originImage.pixelColor( w,j + filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( w,j + filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( w,j + filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) < 0) )   { // top-border
+                                    r	+= originImage.pixelColor( i + filterx,0 ).red() * ws;
+                                    g	+= originImage.pixelColor( i + filterx,0 ).green() * ws;
+                                    b	+= originImage.pixelColor( i + filterx,0 ).blue() * ws;
+                                } else if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) > h) )     { // bottom-border
+                                    r	+= originImage.pixelColor( i + filterx,h ).red() * ws;
+                                    g	+= originImage.pixelColor( i + filterx,h ).green() * ws;
+                                    b	+= originImage.pixelColor( i + filterx,h ).blue() * ws;
+                                }
+                             }
+                        }
+                        image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
+                 }
+             }
+            updateImageDisplay();
+        }
     } else {
         alert();
     }
@@ -454,6 +568,80 @@ void ImageViewer::button_mirror_border()
 {
     if ( image != NULL )
     {
+        int	_x	= slider_size_x_filter->value();
+        int	_y	= slider_size_y_filter->value();
+        if(_x % 2 == 0 || _y == 0) {
+            QMessageBox::information( this, QString::fromLocal8Bit( "Error" ), QString::fromLocal8Bit( "X and Y must be odd number!" ) );
+        } else {
+            readAndParCoTable();
+            for (auto iter = coe.cbegin(); iter != coe.cend(); iter++)
+            {
+                cout << (*iter) << endl;
+            }
+            int	x	= (slider_size_x_filter->value() - 1) / 2; /* z.B 3->1 */
+            int	y	= (slider_size_y_filter->value() - 1) / 2;
+            int	fy	= 2 * y + 1;
+            //cout<<"fy"<<fy<<endl;
+            int	w	= image->width()-1;
+            int	h	= image->height()-1;
+
+            for ( int i = 0; i <= w; i++ )
+            {
+                for ( int j = 0; j <= h; j++ )                                                                  /* pixel loop */
+                {
+                        double	r	= 0;
+                        double	g	= 0;
+                        double	b	= 0;
+                        for ( int filterx = -x; filterx <= x; filterx++ )
+                        {
+                            for ( int filtery = -y; filtery <= y; filtery++ )
+                            {
+                                int	index	= (filtery + y) + (filterx + x) * fy;
+                                double	ws	= coe[ index ];
+                                if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) >= 0) && ( (j + filtery) <= h) ){
+                                    r	+= originImage.pixelColor( i+filterx, j+filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( i+filterx, j+filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) < 0) && ( (j + filtery) < 0) ){         // left-top
+                                    r	+= originImage.pixelColor( -i - filterx, -j - filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( -i - filterx, -j - filtery  ).green() * ws;
+                                    b	+= originImage.pixelColor( -i - filterx, -j - filtery  ).blue() * ws;
+                                } else if( ( (i + filterx) > w) && ( (j + filtery) < 0) ){          // right-top
+                                    r	+= originImage.pixelColor( 2*w-i-filterx, -j - filtery  ).red() * ws;
+                                    g	+= originImage.pixelColor( 2*w-i-filterx, -j - filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( 2*w-i-filterx, -j - filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) < 0) && ( (j + filtery) > h) ){                     // left-bottom
+                                    r	+= originImage.pixelColor( -i - filterx , 2*h-j - filtery).red() * ws;
+                                    g	+= originImage.pixelColor( -i - filterx , 2*h-j - filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( -i - filterx , 2*h-j - filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) > w) && ( (j + filtery) > h) ){   // right-bottom
+                                    r	+= originImage.pixelColor( 2*w-i-filterx,2*h-j - filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( 2*w-i-filterx,2*h-j - filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( 2*w-i-filterx,2*h-j - filtery ).blue() * ws;
+                                } else if (( (i + filterx) < 0) && ( (j + filtery) >= 0) && ( (j + filtery) <= h)) { // left-border
+                                    r	+= originImage.pixelColor( -i - filterx,j + filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( -i - filterx,j + filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( -i - filterx,j + filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) > w) && ( (j + filtery) >= 0) && ( (j + filtery) <= h) ) { // right-border
+                                    r	+= originImage.pixelColor( 2*w-i-filterx,j + filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( 2*w-i-filterx,j + filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( 2*w-i-filterx,j + filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) < 0) )   { // top-border
+                                    r	+= originImage.pixelColor( i + filterx,-j - filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( i + filterx,-j - filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( i + filterx,-j - filtery ).blue() * ws;
+                                } else if ( ( (i + filterx) <= w) && ( (i + filterx) >= 0) && ( (j + filtery) > h) )     { // bottom-border
+                                    r	+= originImage.pixelColor( i + filterx,2*h-j - filtery ).red() * ws;
+                                    g	+= originImage.pixelColor( i + filterx,2*h-j - filtery ).green() * ws;
+                                    b	+= originImage.pixelColor( i + filterx,2*h-j - filtery ).blue() * ws;
+                                }
+                             }
+                        }
+                        image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
+                 }
+             }
+            updateImageDisplay();
+        }
     } else {
         alert();
     }
@@ -1060,10 +1248,13 @@ void ImageViewer::generateControlPanels()
     m_option_layout3->addWidget( lineF );
     QObject::connect( button_filter_without_border, SIGNAL( clicked() ), this, SLOT( button_without_border() ) );
     button_filter_zero_padding	= new QPushButton( "Filter Zero-Padding" );
+    QObject::connect( button_filter_zero_padding, SIGNAL( clicked() ), this, SLOT( button_zero_padding() ) );
     button_filter_constant_border	= new QPushButton( "Filter Constant Border" );
+    QObject::connect(  button_filter_constant_border, SIGNAL( clicked() ), this, SLOT( button_constant_border() ) );
     button_filter_mirror_border	= new QPushButton( "Filter Mirror Border" );
+    QObject::connect(  button_filter_mirror_border, SIGNAL( clicked() ), this, SLOT( button_mirror_border() ) );
     button_filter_gauss		= new QPushButton( "Filter 2D-Gauss" );
-
+    QObject::connect(  button_filter_gauss, SIGNAL( clicked() ), this, SLOT( button_gauss()));
     m_option_layout3->addWidget( button_filter_zero_padding );
     m_option_layout3->addWidget( button_filter_constant_border );
     m_option_layout3->addWidget( button_filter_mirror_border );
