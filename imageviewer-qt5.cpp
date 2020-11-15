@@ -381,7 +381,6 @@ void ImageViewer::button_without_border()
                 {
                     //cout<<"i-x:"<<i-x<<endl;
                     //cout<<"j-y:"<<j-y<<endl;
-
                     if ( ( (i - x) < 0) && ( (j - y) < 0) )                                            /* left-top */
                     { /* mach nichts hier */ //cout<<"lt"<<endl;
                     } if ( ( (i - x) < 0) && ( (j - y) >= 0) && ( (j + y) <= h) )                      /* left-border */
@@ -415,9 +414,9 @@ void ImageViewer::button_without_border()
                                 b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
                             }
                         }
-//                        if(i==200 && j == 100){
-//                            cout<<"or:"<<originImage.pixelColor(i,j).red()<<endl<<r<<endl;
-//                        }
+                        //  if(i==200 && j == 100){
+                        //    cout<<"or:"<<originImage.pixelColor(i,j).red()<<endl<<r<<endl;
+                        //  }
                         image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
                     }
                 }
@@ -469,9 +468,7 @@ void ImageViewer::button_zero_padding()
                                     r	+= originImage.pixelColor( i+filterx, j+filtery ).red() * ws;
                                     g	+= originImage.pixelColor( i+filterx, j+filtery ).green() * ws;
                                     b	+= originImage.pixelColor( i+filterx, j+filtery ).blue() * ws;
-                                } else { // color = color + 0
-
-                                }
+                                }  // else color = color + 0
                             }
                         }
                         image->setPixel( i, j, qRgb( (int) r, (int) g, (int) b ) );
@@ -997,6 +994,79 @@ void ImageViewer::automaticContrast()
     }
 }
 
+void ImageViewer::button_edge() { // sobel algo
+    if(image!=NULL) {
+        int sobel_x[3][3] = {
+            {-1, 0, 1},
+            {-2, 0, 2},
+            {-1, 0, 1}
+        };
+        int sobel_y[3][3] = {
+            { 1,   2,   1},
+            { 0,   0,   0},
+            {-1,  -2,  -1}
+        };
+        QImage img = originGrayImage;
+
+        int width = img.width();
+        int height = img.height();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if(y == 0 || x== 0 || y == height - 1 || x == width - 1) { // zero - padding
+                    image->setPixel(x,y,0);
+                } else {
+                    int i1 = (QColor(img.pixel(x-1,y-1)).red() + QColor(img.pixel(x-1,y-1)).blue() + QColor(img.pixel(x-1,y-1)).green())/3;
+                    int i2 = (QColor(img.pixel(x,y-1)).red() + QColor(img.pixel(x,y-1)).blue() + QColor(img.pixel(x,y-1)).green())/3;
+                    int i3 = (QColor(img.pixel(x+1,y-1)).red() + QColor(img.pixel(x+1,y-1)).green() + QColor(img.pixel(x+1,y-1)).blue())/3;
+                    int i4 = (QColor(img.pixel(x-1,y)).blue() + QColor(img.pixel(x-1,y)).green() + QColor(img.pixel(x-1,y)).red())/3;
+                    int i5 = (QColor(img.pixel(x,y)).green() + QColor(img.pixel(x,y)).red() + QColor(img.pixel(x,y)).blue())/3;
+                    int i6 = (QColor(img.pixel(x+1,y)).blue() + QColor(img.pixel(x+1,y)).red() + QColor(img.pixel(x+1,y)).green())/3;
+                    int i7 = (QColor(img.pixel(x-1,y+1)).green() + QColor(img.pixel(x-1,y+1)).red() + QColor(img.pixel(x-1,y+1)).blue())/3;
+                    int i8 = (QColor(img.pixel(x,y+1)).blue() + QColor(img.pixel(x,y+1)).green() + QColor(img.pixel(x,y+1)).red())/3;
+                    int i9 = (QColor(img.pixel(x+1,y+1)).red() + QColor(img.pixel(x+1,y+1)).green() + QColor(img.pixel(x+1,y+1)).blue())/3;
+
+                    int sumX = 0;
+                    int sumY = 0;
+
+                    int newMatrix[3][3] = {
+                        {i1,i2,i3},
+                        {i4,i5,i6},
+                        {i7,i8,i9}
+                    };
+
+                    for(int v = 0; v < 3; v++) {
+                        for(int w = 0; w < 3; w++) {
+                            sumX += newMatrix[v][w] * sobel_x[v][w];
+                            sumY += newMatrix[v][w] * sobel_y[v][w];
+                        }
+                    }
+
+                    int newValue = sqrt(pow(sumX, 2) + pow(sumY, 2));
+    //                cout << newValue << endl;
+                    if(newValue < 0){
+                        newValue = 0;
+                    }
+                    if(newValue > 255){
+                        newValue = 255;
+                    }
+
+                    QColor imgColor = QColor(image->pixel(x,y));
+
+                    imgColor.setRed(newValue);
+                    imgColor.setBlue(newValue);
+                    imgColor.setGreen(newValue);
+
+                    image->setPixel(x,y,imgColor.rgb());
+                }
+            }
+        }
+        updateImageDisplay();
+    } else {
+        alert();
+    }
+}
+
 
 void ImageViewer::generateControlPanels()
 {
@@ -1024,6 +1094,10 @@ void ImageViewer::generateControlPanels()
     auto lineE = new QFrame;
     lineE->setFrameShape( QFrame::HLine );
     lineE->setFrameShadow( QFrame::Sunken );
+
+    auto lineG = new QFrame;
+    lineG->setFrameShape( QFrame::HLine );
+    lineG->setFrameShadow( QFrame::Sunken );
 
     QFont ft;
     ft.setPointSize( 10 );
@@ -1183,7 +1257,7 @@ void ImageViewer::generateControlPanels()
 /*    m_option_layout2->addWidget(button3); */
 
 
-    tabWidget->addTab( m_option_panel2, "Aufgabe 2" );
+    tabWidget->addTab( m_option_panel2, "Aufgabe 2 - 3" );
 
     m_option_panel3		= new QWidget();
     m_option_layout3	= new QVBoxLayout();
@@ -1255,6 +1329,9 @@ void ImageViewer::generateControlPanels()
     QObject::connect(  button_filter_mirror_border, SIGNAL( clicked() ), this, SLOT( button_mirror_border() ) );
     button_filter_gauss		= new QPushButton( "Filter 2D-Gauss" );
     QObject::connect(  button_filter_gauss, SIGNAL( clicked() ), this, SLOT( button_gauss()));
+    button_filter_edge = new QPushButton("Filter Edge");
+    QObject::connect(  button_filter_edge, SIGNAL( clicked() ), this, SLOT( button_edge()));
+
     m_option_layout3->addWidget( button_filter_zero_padding );
     m_option_layout3->addWidget( button_filter_constant_border );
     m_option_layout3->addWidget( button_filter_mirror_border );
@@ -1268,8 +1345,25 @@ void ImageViewer::generateControlPanels()
     m_option_layout3->addWidget( lineE );
     m_option_layout3->addLayout( h_filter_gauss );
     m_option_layout3->addWidget( button_filter_gauss );
+    m_option_layout3->addWidget(lineG);
+    m_option_layout3->addWidget(button_filter_edge);
 
-    tabWidget->addTab( m_option_panel3, "Aufgabe 3" );
+    tabWidget->addTab( m_option_panel3, "Aufgabe 4 - 5" );
+
+    m_option_panel4		= new QWidget();
+    m_option_layout4	= new QVBoxLayout();
+//    QLabel* label_coefficient_2 = new QLabel( "Coefficients:" );
+//    label_coefficient_2->setFont( ft );
+//    m_option_layout4->addWidget(label_coefficient_2);
+//    m_option_layout4->addWidget(m_coefficients_2);
+
+
+    m_option_panel4->setLayout(m_option_layout4);
+
+
+
+    tabWidget->addTab( m_option_panel4, "Aufgabe 6" );
+
     tabWidget->show();
     /* Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen */
 }

@@ -74,10 +74,13 @@ class ImageViewer : public QMainWindow
      QVBoxLayout*    m_option_layout1;
 
      QWidget*	m_option_panel2;
-     QVBoxLayout*    m_option_layout2;
+     QVBoxLayout* m_option_layout2;
 
      QWidget* m_option_panel3;
-     QVBoxLayout*    m_option_layout3;
+     QVBoxLayout* m_option_layout3;
+
+     QWidget* m_option_panel4;
+     QVBoxLayout* m_option_layout4;
 
      QPushButton* button1;
      QPushButton* button2;
@@ -88,6 +91,8 @@ class ImageViewer : public QMainWindow
      QPushButton* button_filter_constant_border;
      QPushButton* button_filter_mirror_border;
      QPushButton* button_filter_gauss;
+
+     QPushButton* button_filter_edge;
 
      QSpinBox* spinbox1;
      QSpinBox* spinbox2;
@@ -106,7 +111,9 @@ class ImageViewer : public QMainWindow
      // hier können weitere GUI Objekte hin wie Buttons Slider etc. 
 
      QCustomPlot *m_histogram;
+
      QTableWidget* m_coefficients;
+     QTableWidget* m_coefficients_2;
  private slots:
 
      // Beispiel für einen Algorithmus
@@ -121,6 +128,7 @@ class ImageViewer : public QMainWindow
      void changeSpinbox3(int);
      void confirmDynamik();
      void histogram();
+
      void setSliderFilterYSizeValue(int);
      void setSliderFilterXSizeValue(int);
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
@@ -138,6 +146,7 @@ class ImageViewer : public QMainWindow
      void button_constant_border();
      void button_mirror_border();
      void button_gauss();
+     void button_edge();
 
 public:
      ImageViewer();
