@@ -656,29 +656,39 @@ void ImageViewer::button_gauss()
 
 
         double sum=0.0;
-        int height =originGrayImage.height();
-        int width = originGrayImage.width();
-        vector<vector<double>> kernel(height, vector<double>(width));
+        int height =originGrayImage.height()-1;
+        int width = originGrayImage.width()-1;
         double sigma = spinbox_filter_gauss->value();
-        cout << sigma << endl;
-        for (int i=0 ; i< height ; i++) {
-            for (int j=0 ; j< width ; j++) {
-                kernel[i][j] = exp(-(i*i+j*j)/(2*sigma*sigma))/(2*M_PI*sigma*sigma);
-                sum += kernel[i][j];
-            }
+        int center = (int) (3.0 * sigma);
+        int size = 2 * center + 1;
+        float h[size];
+        double sigma2 = sigma * sigma;
+        for (int i=0; i< size;i++){
+            double r = center - i;
+            h[i] = (float) exp(-0.5 * (r*r) / sigma2);
+            sum += h[i];
+        }
+        for (int i=0; i< size;i++){
+            h[i] /= sum;
+            cout<<h[i]<<endl;
         }
 
-        for (int i=0 ; i<height ; i++) {
-            for (int j=0 ; j<width ; j++) {
-                kernel[i][j] /= sum;
+        for(int i=0+center;i<width-center;i++){
+            for(int j=0+center;j<height-center;j++){
+                float r=0,g=0,b=0;
+                for(int fx=-center;fx<=center;fx++){
+                    for(int fy=-center;fy<=center;fy++){
+                        QColor oldColor = originImage.pixelColor(i+fx,j+fy);
+                        r += oldColor.red()*h[fx+center]*h[fy+center];
+                        g += oldColor.green()*h[fx+center]*h[fy+center];
+                        b += oldColor.blue()*h[fx+center]*h[fy+center];
+                    }
+                }
+                image->setPixelColor(i,j,QColor((int)r,(int)g,(int)b));
             }
         }
+        updateImageDisplay();
 
-        for (int i=0 ; i<height ; i++) {
-            for (int j=0 ; j<width ; j++) {
-                cout << "i: " << i << " j: " << j << " :" << kernel[i][j] << endl;
-            }
-        }
 
     } else {
         alert();
