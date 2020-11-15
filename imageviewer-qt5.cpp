@@ -91,7 +91,7 @@ ImageViewer::ImageViewer()
     createActions();
     createMenus();
 
-    resize( QGuiApplication::primaryScreen()->availableSize() * 0.85 );
+    resize( QGuiApplication::primaryScreen()->availableSize() * 0.65 );
 }
 
 
@@ -649,6 +649,37 @@ void ImageViewer::button_gauss()
 {
     if ( image != NULL )
     {
+//        int x_filter_size = slider_size_x_filter->value();
+//        int y_filter_size = slider_size_y_filter->value();
+//        cout << x_filter_size << endl;
+//        cout << y_filter_size << endl;
+
+
+        double sum=0.0;
+        int height =originGrayImage.height();
+        int width = originGrayImage.width();
+        vector<vector<double>> kernel(height, vector<double>(width));
+        double sigma = spinbox_filter_gauss->value();
+        cout << sigma << endl;
+        for (int i=0 ; i< height ; i++) {
+            for (int j=0 ; j< width ; j++) {
+                kernel[i][j] = exp(-(i*i+j*j)/(2*sigma*sigma))/(2*M_PI*sigma*sigma);
+                sum += kernel[i][j];
+            }
+        }
+
+        for (int i=0 ; i<height ; i++) {
+            for (int j=0 ; j<width ; j++) {
+                kernel[i][j] /= sum;
+            }
+        }
+
+        for (int i=0 ; i<height ; i++) {
+            for (int j=0 ; j<width ; j++) {
+                cout << "i: " << i << " j: " << j << " :" << kernel[i][j] << endl;
+            }
+        }
+
     } else {
         alert();
     }
