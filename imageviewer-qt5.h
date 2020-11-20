@@ -82,6 +82,9 @@ class ImageViewer : public QMainWindow
      QWidget* m_option_panel4;
      QVBoxLayout* m_option_layout4;
 
+     QWidget* m_option_panel5;
+     QVBoxLayout* m_option_layout5;
+
      QPushButton* button1;
      QPushButton* button2;
      QPushButton* button3;
@@ -94,10 +97,17 @@ class ImageViewer : public QMainWindow
 
      QPushButton* button_filter_edge;
 
+     QPushButton* button_canny_edge;
+     QPushButton* button_usm_dete;
+
      QSpinBox* spinbox1;
      QSpinBox* spinbox2;
      QSpinBox* spinbox3;
+     QSpinBox* spinbox_sch_grad;
+     QSpinBox* spinbox_mind_wert;
      QDoubleSpinBox* spinbox_filter_gauss;
+     QDoubleSpinBox* spinbox_ce_sigma;
+     QDoubleSpinBox* spinbox_usm_sigma;
 
      QSlider* slider1;
      QSlider* slider2;
@@ -105,6 +115,9 @@ class ImageViewer : public QMainWindow
 
      QSlider* slider_size_x_filter;
      QSlider* slider_size_y_filter;
+
+     QSlider* slider_size_xce_filter;
+     QSlider* slider_size_yce_filter;
 
      QLabel* label_contrast_value;
      QLabel* label_brightness_value;
@@ -131,6 +144,9 @@ class ImageViewer : public QMainWindow
 
      void setSliderFilterYSizeValue(int);
      void setSliderFilterXSizeValue(int);
+
+     void setSliderCEYSizeValue(int);
+     void setSliderCEXSizeValue(int);
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
 
@@ -147,6 +163,8 @@ class ImageViewer : public QMainWindow
      void button_mirror_border();
      void button_gauss();
      void button_edge();
+     void button_canny();
+     void button_usm();
 
 public:
      ImageViewer();
@@ -189,6 +207,9 @@ protected:
 
     QLabel* label_size_filter_x;
     QLabel* label_size_filter_y;
+
+    QLabel* label_size_ce_x;
+    QLabel* label_size_ce_y;
 
     QScrollArea* scrollArea;
     double scaleFactor;

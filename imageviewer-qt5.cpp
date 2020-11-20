@@ -68,7 +68,18 @@ int	slider3Value	= 10;
 int	x_filter_size	= 1;
 int	y_filter_size	= 1;
 
+int	x_ce_size	= 1;
+int	y_ce_size	= 1;
+
+
+
 double spinboxDoubleValue = 0.5;
+double spinboxDoubleCEValue = 0.85;
+double spinboxDoubleUSMValue = 0.85;
+
+int schaefungsGrad = 3;
+int mindesWert = 20;
+
 
 int		avh	= 0;
 int		vari	= 0;
@@ -649,10 +660,7 @@ void ImageViewer::button_gauss()
 {
     if ( image != NULL )
     {
-//        int x_filter_size = slider_size_x_filter->value();
-//        int y_filter_size = slider_size_y_filter->value();
-//        cout << x_filter_size << endl;
-//        cout << y_filter_size << endl;
+
 
 
         double sum=0.0;
@@ -670,7 +678,6 @@ void ImageViewer::button_gauss()
         }
         for (int i=0; i< size;i++){
             h[i] /= sum;
-            cout<<h[i]<<endl;
         }
 
         for(int i=0+center;i<width-center;i++){
@@ -1108,6 +1115,28 @@ void ImageViewer::button_edge() { // sobel algo
     }
 }
 
+void ImageViewer::setSliderCEYSizeValue(int newValue) {
+    y_ce_size = newValue;
+    label_size_ce_y->setText( QString::number( newValue ) );
+}
+
+void ImageViewer::setSliderCEXSizeValue(int newValue) {
+    x_ce_size = newValue;
+    label_size_ce_x->setText( QString::number( newValue ) );
+}
+
+void ImageViewer::button_canny() {
+    spinbox_ce_sigma->value();
+    slider_size_xce_filter->value();
+    slider_size_yce_filter->value();
+}
+
+void ImageViewer::button_usm() {
+    spinbox_sch_grad->value();
+    spinbox_usm_sigma->value();
+    spinbox_mind_wert->value();
+}
+
 
 void ImageViewer::generateControlPanels()
 {
@@ -1139,6 +1168,10 @@ void ImageViewer::generateControlPanels()
     auto lineG = new QFrame;
     lineG->setFrameShape( QFrame::HLine );
     lineG->setFrameShadow( QFrame::Sunken );
+
+    auto lineH = new QFrame;
+    lineH->setFrameShape( QFrame::HLine );
+    lineH->setFrameShadow( QFrame::Sunken );
 
     QFont ft;
     ft.setPointSize( 10 );
@@ -1398,8 +1431,98 @@ void ImageViewer::generateControlPanels()
 //    m_option_layout4->addWidget(label_coefficient_2);
 //    m_option_layout4->addWidget(m_coefficients_2);
 
+    QVBoxLayout	* v_x_ce_size	= new QVBoxLayout();
+    QVBoxLayout	* v_y_ce_size	= new QVBoxLayout();
 
+    QHBoxLayout	* h_x_ce_size	= new QHBoxLayout();
+    QLabel		* label_xce_size	= new QLabel( "t_hi(t_hi > t_lo):" );
+    label_xce_size->setFont( ft );
+    h_x_ce_size->addWidget( label_xce_size );
+    label_size_ce_x = new QLabel( QString::number( x_ce_size ) );
+    label_size_ce_x->setFont( ft );
+    h_x_ce_size->addWidget( label_size_ce_x );
+
+    QHBoxLayout	* h_y_ce_size	= new QHBoxLayout();
+    QLabel		* label_yce_size	= new QLabel( "t_lo(t_hi > t_lo):" );
+
+    label_yce_size->setFont( ft );
+    h_y_ce_size->addWidget( label_yce_size );
+    label_size_ce_y = new QLabel( QString::number( y_ce_size ) );
+    label_size_ce_y->setFont( ft );
+    h_y_ce_size->addWidget( label_size_ce_y );
+
+    slider_size_xce_filter = new QSlider( Qt::Horizontal );
+    slider_size_xce_filter->setValue( 1 );
+
+    slider_size_xce_filter->setTickInterval( 1 );
+    slider_size_xce_filter->setRange( 1, 255 );
+    slider_size_xce_filter->setTickPosition( QSlider::TicksBothSides );
+    QObject::connect( slider_size_xce_filter, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderCEXSizeValue( int ) ) );
+
+    slider_size_yce_filter = new QSlider( Qt::Horizontal );
+    slider_size_yce_filter->setValue( 1 );
+    slider_size_yce_filter->setTickInterval( 1 );
+    slider_size_yce_filter->setRange( 1, 255 );
+    slider_size_yce_filter->setTickPosition( QSlider::TicksBothSides );
+    QObject::connect( slider_size_yce_filter, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderCEYSizeValue( int ) ) );
+
+    v_x_ce_size->addLayout( h_x_ce_size );
+    v_x_ce_size->addWidget( slider_size_xce_filter );
+
+    v_y_ce_size->addLayout( h_y_ce_size );
+    v_y_ce_size->addWidget( slider_size_yce_filter );
+
+
+
+    m_option_layout4->addLayout( v_x_ce_size );
+    m_option_layout4->addLayout( v_y_ce_size );
+
+    QHBoxLayout	* h_ce_sigma	= new QHBoxLayout();
+    QLabel		* label_ce_sigma	= new QLabel( "σ for Canny:" );
+    spinbox_ce_sigma = new QDoubleSpinBox();
+    spinbox_ce_sigma->setValue( spinboxDoubleCEValue );
+    h_ce_sigma->addWidget( label_ce_sigma );
+    h_ce_sigma->addWidget( spinbox_ce_sigma );
+
+    m_option_layout4->addLayout( h_ce_sigma );
+    button_canny_edge = new QPushButton("Canny Edge Algo");
+    QObject::connect(  button_canny_edge, SIGNAL( clicked() ), this, SLOT( button_canny()));
+    m_option_layout4->addWidget(button_canny_edge);
+    m_option_layout4->addWidget(lineG);
+
+    QHBoxLayout	* h_sch_grad	= new QHBoxLayout();
+    QLabel		* label_sch_grad	= new QLabel( "Schärfungsgrad:" );
+    spinbox_sch_grad = new QSpinBox();
+    spinbox_sch_grad->setValue( schaefungsGrad );
+    h_sch_grad->addWidget( label_sch_grad );
+    h_sch_grad->addWidget( spinbox_sch_grad );
+
+    m_option_layout4->addLayout( h_sch_grad );
+
+    QHBoxLayout	* h_usm_sigma	= new QHBoxLayout();
+    QLabel		* label_usm_sigma	= new QLabel( "σ for USM:" );
+    spinbox_usm_sigma = new QDoubleSpinBox();
+    spinbox_usm_sigma->setValue( spinboxDoubleUSMValue );
+    h_usm_sigma->addWidget( label_usm_sigma );
+    h_usm_sigma->addWidget( spinbox_usm_sigma );
+
+    m_option_layout4->addLayout( h_usm_sigma );
+
+    QHBoxLayout	* h_mind_wert	= new QHBoxLayout();
+    QLabel		* label_mind_wert	= new QLabel( "Mindeswert (tc):" );
+    spinbox_mind_wert = new QSpinBox();
+    spinbox_mind_wert->setValue( mindesWert );
+    h_mind_wert->addWidget( label_mind_wert );
+    h_mind_wert->addWidget( spinbox_mind_wert );
+
+    m_option_layout4->addLayout( h_mind_wert );
+
+    button_usm_dete = new QPushButton("USM-Filter");
+    QObject::connect(  button_usm_dete, SIGNAL( clicked() ), this, SLOT( button_usm()));
+
+    m_option_layout4->addWidget(button_usm_dete);
     m_option_panel4->setLayout(m_option_layout4);
+
 
 
 
