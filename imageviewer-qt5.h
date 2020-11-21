@@ -171,6 +171,7 @@ public:
      bool loadFile(const QString &);
      void updateImageDisplay();
      void readAndParCoTable();
+     void suppressed(double Gp[10000][10000]);
 protected:
 
     void resizeEvent(QResizeEvent * event);
