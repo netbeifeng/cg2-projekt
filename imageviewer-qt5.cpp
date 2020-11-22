@@ -1180,16 +1180,22 @@ void ImageViewer::button_canny() {
         cout<<"end of blur"<<endl;
 
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                if(y == 0 || x== 0 || y == height || x == width) { // zero - padding
+        for (int y = 0; y <= height; y++) {
+            for (int x = 0; x <= width; x++) {
+                if(y == 0 || x== 0 || y == (height) || x == (width)) { // zero - padding
                     //image->setPixel(x,y,0);
+//                    if(x==width) {
+//                        cout << "123" <<endl;
+//                    } else {
+//                        cout << "456" <<endl;
+//                    }
                     Gx.append(0.000000000001);
                     Gy.append(0);
+//                    cout << " | y: " << y << " | (height+1): " << (height+1) << "| y*(height+1): " << y*(height+1) << "| x: " << x << "| y*(height+1)+x: " << y*(height+1)+x << endl;
                     Gp.append(atan(Gy[y*(height+1)+x]/Gx[y*(height+1)+x])*57.3+90);
 
                 } else {
-                    cout<<y<<" "<<x<<endl;
+//                    cout<<y<<" "<<x<<endl;
                     int i1 = (QColor(img.pixel(x-1,y-1)).red() + QColor(img.pixel(x-1,y-1)).blue() + QColor(img.pixel(x-1,y-1)).green())/3;
                     int i2 = (QColor(img.pixel(x,y-1)).red() + QColor(img.pixel(x,y-1)).blue() + QColor(img.pixel(x,y-1)).green())/3;
                     int i3 = (QColor(img.pixel(x+1,y-1)).red() + QColor(img.pixel(x+1,y-1)).green() + QColor(img.pixel(x+1,y-1)).blue())/3;
@@ -1215,13 +1221,16 @@ void ImageViewer::button_canny() {
                             sumY += newMatrix[v][w] * sobel_y[v][w];
                         }
                     }
+//                    cout<< "check point" <<endl;
                     if(sumX == 0){
                      Gx.append(0.000000000001);
                     } else {
                      Gx.append(sumX);
                     }
+//                    cout<< "check point" <<endl;
                     Gy.append(sumY);
-                    Gp.append(atan(Gy[y*(height+1)+x]/Gx[y*(height+1)+x])*57.3+90); // Drection+=pi/2
+                    Gp.append(atan(Gy[y*(height+1)+x-1]/Gx[y*(height+1)+x-1])*57.3+90); // Drection+=pi/2
+//                    cout<< "check point" <<endl;
                 }
             }
         }
@@ -1281,7 +1290,7 @@ void ImageViewer::button_canny() {
 
         for (int y = 1; y < height; y++) {
             for (int x = 1; x < width; x++) {
-            image -> setPixelColor(x,y,QColor(Gp[y*(height+1)+x],Gp[y*(height+1)+x],Gp[y*(height+1)+x]));
+                image -> setPixelColor(x,y,QColor(Gp[y*(height+1)+x],Gp[y*(height+1)+x],Gp[y*(height+1)+x]));
             }
         }
 
@@ -1377,11 +1386,9 @@ void ImageViewer::generateControlPanels()
     QPushButton *confirm_dynamik = new QPushButton( "Change Dynamic" );
     QObject::connect( confirm_dynamik, SIGNAL( clicked() ), this, SLOT( confirmDynamik() ) );
 
-
     QObject::connect( spinbox1, SIGNAL( valueChanged( int ) ), this, SLOT( changeDynamik( int ) ) );
     m_change_dynamik->addWidget( spinbox1 );
     m_change_dynamik->addWidget( confirm_dynamik );
-
 
     m_option_panel2->setLayout( m_option_layout2 );
 
@@ -1394,7 +1401,6 @@ void ImageViewer::generateControlPanels()
     QObject::connect( button2, SIGNAL( clicked() ), this, SLOT( initDataTab2() ) );
     h_mv->addWidget( HV );
     h_mv->addWidget( button2 );
-
 
     m_option_layout2->addLayout( h_mv );
 
