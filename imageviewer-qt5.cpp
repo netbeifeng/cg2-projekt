@@ -71,6 +71,9 @@ int	y_filter_size	= 1;
 int	x_ce_size	= 1;
 int	y_ce_size	= 1;
 
+int theta = 1;
+int rho = 1;
+
 
 double spinboxDoubleValue = 0.5;
 double spinboxDoubleCEValue = 0.85;
@@ -1123,6 +1126,36 @@ void ImageViewer::setSliderCEXSizeValue(int newValue) {
     label_size_ce_x->setText( QString::number( newValue ) );
 }
 
+void ImageViewer::button_hough() {
+    double PI = 3.14159265358979323846;
+    int n_theta = slider_theta->value();
+    int n_rho = slider_rho->value();
+    int x_c = image->width() /2 ;
+    int y_c = image->height() / 2;
+    double angle = (PI)/n_theta;
+
+    double diagonal = sqrt(pow(x_c,2)+pow(y_c,2));
+    double max = (2*diagonal)/n_rho;
+    int result_array[n_theta][n_rho];
+
+    for(int i = 0; i <image->height(); i++) {
+        for(int j = 0; j <image->width(); j++) {
+            if(image->pixel(j,i) > 0) {
+                int x = j - x_c;
+                int y = i - y_c;
+                for(int a =0; a < n_theta; a++) {
+                    double _theta = angle * a;
+                    int r = (int) round(x*cos(_theta) + y*sin(_theta) / max) + n_rho /2;
+                    if(r >= 0 && r <n_rho) {
+                        result_array[a][r]++;
+                        cout<<result_array[a][r]<<endl;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void ImageViewer::button_canny() {
     if ( image != NULL )
     {
@@ -1315,6 +1348,14 @@ void ImageViewer::button_usm() {
     spinbox_mind_wert->value();
 }
 
+
+void ImageViewer::setSliderTheta(int newValue) {
+    label_theta_t->setText(QString::number(newValue));
+}
+
+void ImageViewer::setSliderRho(int newValue) {
+    label_rho_r->setText(QString::number(newValue));
+}
 
 void ImageViewer::generateControlPanels()
 {
@@ -1610,7 +1651,7 @@ void ImageViewer::generateControlPanels()
     QVBoxLayout	* v_y_ce_size	= new QVBoxLayout();
 
     QHBoxLayout	* h_x_ce_size	= new QHBoxLayout();
-    QLabel		* label_xce_size	= new QLabel( "t_hi(t_hi > t_lo):" );
+    QLabel		* label_xce_size	= new QLabel( "t<sub>high</sub>:" );
     label_xce_size->setFont( ft );
     h_x_ce_size->addWidget( label_xce_size );
     label_size_ce_x = new QLabel( QString::number( x_ce_size ) );
@@ -1618,7 +1659,7 @@ void ImageViewer::generateControlPanels()
     h_x_ce_size->addWidget( label_size_ce_x );
 
     QHBoxLayout	* h_y_ce_size	= new QHBoxLayout();
-    QLabel		* label_yce_size	= new QLabel( "t_lo(t_hi > t_lo):" );
+    QLabel		* label_yce_size	= new QLabel( "t<sub>low</sub>:" );
 
     label_yce_size->setFont( ft );
     h_y_ce_size->addWidget( label_yce_size );
@@ -1702,6 +1743,61 @@ void ImageViewer::generateControlPanels()
 
 
     tabWidget->addTab( m_option_panel4, "Aufgabe 6" );
+
+    m_option_panel5		= new QWidget();
+    m_option_layout5	= new QVBoxLayout();
+
+
+    QVBoxLayout	* v_theta	= new QVBoxLayout();
+    QVBoxLayout	* v_rho	= new QVBoxLayout();
+
+    QHBoxLayout	* h_theta	= new QHBoxLayout();
+    QLabel		* label_theta	= new QLabel( "t<sub>high</sub>:" );
+    label_theta->setFont( ft );
+    h_theta->addWidget( label_theta );
+    label_theta_t = new QLabel( QString::number( theta ) );
+    label_theta_t->setFont( ft );
+    h_theta->addWidget( label_theta_t );
+
+    QHBoxLayout	* h_rho	= new QHBoxLayout();
+    QLabel		* label_rho	= new QLabel( "t<sub>low</sub>:" );
+
+    label_rho->setFont( ft );
+    h_rho->addWidget( label_rho );
+    label_rho_r = new QLabel( QString::number( rho ) );
+    label_rho_r->setFont( ft );
+    h_rho->addWidget( label_rho_r );
+
+    slider_theta = new QSlider( Qt::Horizontal );
+    slider_theta->setValue( 1 );
+
+    slider_theta->setTickInterval( 1 );
+    slider_theta->setRange( 1, 255 );
+    slider_theta->setTickPosition( QSlider::TicksBothSides );
+    QObject::connect( slider_theta, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderTheta( int ) ) );
+
+    slider_rho = new QSlider( Qt::Horizontal );
+    slider_rho->setValue( 1 );
+    slider_rho->setTickInterval( 1 );
+    slider_rho->setRange( 1, 255 );
+    slider_rho->setTickPosition( QSlider::TicksBothSides );
+    QObject::connect( slider_rho, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderRho( int ) ) );
+
+    v_theta->addLayout( h_theta );
+    v_theta->addWidget( slider_theta );
+
+    v_rho->addLayout( h_rho );
+    v_rho->addWidget( slider_rho );
+
+    m_option_layout5->addLayout(v_theta);
+    m_option_layout5->addLayout(v_rho);
+
+    button_hough_tran = new QPushButton("Hough Transformation");
+    QObject::connect(  button_hough_tran, SIGNAL( clicked() ), this, SLOT( button_hough()));
+    m_option_layout5->addWidget(button_hough_tran);
+    m_option_panel5->setLayout(m_option_layout5);
+
+    tabWidget->addTab( m_option_panel5, "Aufgabe 7" );
 
     tabWidget->show();
     /* Hinweis: Es bietet sich an pro Aufgabe jeweils einen solchen Tab zu erstellen */
