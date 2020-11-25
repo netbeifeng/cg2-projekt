@@ -183,7 +183,7 @@ public:
      bool loadFile(const QString &);
      void updateImageDisplay();
      void readAndParCoTable();
-     void suppressed(double Gp[10000][10000]);
+     void TraceAndThreshold(QVector<int> &Gbin, QVector<double> Gnms, int x, int y, int lowThreshold);
 protected:
 
     void resizeEvent(QResizeEvent * event);

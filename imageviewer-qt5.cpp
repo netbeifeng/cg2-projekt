@@ -1163,11 +1163,13 @@ void ImageViewer::button_canny() {
 
         int height =originImage.height()-1;
         int width = originImage.width()-1;
-        QImage img = originImage.copy();
+        QImage img = originGrayImage.copy();
         QVector<double> Gx;
         QVector<double> Gy;
         QVector<double> Gp;
-
+        QVector<double> Gnms;
+        QVector<int> Gs;
+        QVector<int> Gbin;
         int highThreshold = slider_size_xce_filter->value();
         int lowThreshold = slider_size_yce_filter->value();
         if(lowThreshold > highThreshold) {
@@ -1217,21 +1219,23 @@ void ImageViewer::button_canny() {
     //
     cout<<"end of blur"<<endl;
 
+    for (int y = 0; y <= height; y++) {
+        for (int x = 0; x <= width; x++) {
+           Gbin.append(0);
+           Gnms.append(0);
+        }
+    }
 
     for (int y = 0; y <= height; y++) {
         for (int x = 0; x <= width; x++) {
+
             if(y == 0 || x== 0 || y == (height) || x == (width)) { // zero - padding
-                //image->setPixel(x,y,0);
-//                    if(x==width) {
-//                        cout << "123" <<endl;
-//                    } else {
-//                        cout << "456" <<endl;
-//                    }
                 Gx.append(0.000000000001);
                 Gy.append(0);
 //                    cout << " | y: " << y << " | (height+1): " << (height+1) << "| y*(height+1): " << y*(height+1) << "| x: " << x << "| y*(height+1)+x: " << y*(height+1)+x << endl;
-                Gp.append(atan(Gy[y*(height+1)+x]/Gx[y*(height+1)+x])*57.3+90);
 
+                Gp.append(sqrt(pow(Gy[y*(height+1)+x],2)+pow(Gx[y*(height+1)+x],2)));
+                Gs.append(0);
             } else {
 //                    cout<<y<<" "<<x<<endl;
                 int i1 = (QColor(img.pixel(x-1,y-1)).red() + QColor(img.pixel(x-1,y-1)).blue() + QColor(img.pixel(x-1,y-1)).green())/3;
@@ -1259,88 +1263,121 @@ void ImageViewer::button_canny() {
                         sumY += newMatrix[v][w] * sobel_y[v][w];
                     }
                 }
-//                    cout<< "check point" <<endl;
+
                 if(sumX == 0){
                  Gx.append(0.000000000001);
                 } else {
                  Gx.append(sumX);
                 }
-//                    cout<< "check point" <<endl;
+
                 Gy.append(sumY);
-                Gp.append(atan(Gy[y*(height+1)+x-1]/Gx[y*(height+1)+x-1])*57.3+90); // Drection+=pi/2
-//                    cout<< "check point" <<endl;
-            }
-        }
-    }
-    for (int y = 1; y < height; y++) {
-        for (int x = 1; x < width; x++) {
-            int i1 = (QColor(img.pixel(x-1,y-1)).red() + QColor(img.pixel(x-1,y-1)).blue() + QColor(img.pixel(x-1,y-1)).green())/3;
-            int i2 = (QColor(img.pixel(x,y-1)).red() + QColor(img.pixel(x,y-1)).blue() + QColor(img.pixel(x,y-1)).green())/3;
-            int i3 = (QColor(img.pixel(x+1,y-1)).red() + QColor(img.pixel(x+1,y-1)).green() + QColor(img.pixel(x+1,y-1)).blue())/3;
-            int i4 = (QColor(img.pixel(x-1,y)).blue() + QColor(img.pixel(x-1,y)).green() + QColor(img.pixel(x-1,y)).red())/3;
-            int i5 = (QColor(img.pixel(x,y)).green() + QColor(img.pixel(x,y)).red() + QColor(img.pixel(x,y)).blue())/3;
-            int i6 = (QColor(img.pixel(x+1,y)).blue() + QColor(img.pixel(x+1,y)).red() + QColor(img.pixel(x+1,y)).green())/3;
-            int i7 = (QColor(img.pixel(x-1,y+1)).green() + QColor(img.pixel(x-1,y+1)).red() + QColor(img.pixel(x-1,y+1)).blue())/3;
-            int i8 = (QColor(img.pixel(x,y+1)).blue() + QColor(img.pixel(x,y+1)).green() + QColor(img.pixel(x,y+1)).red())/3;
-            int i9 = (QColor(img.pixel(x+1,y+1)).red() + QColor(img.pixel(x+1,y+1)).green() + QColor(img.pixel(x+1,y+1)).blue())/3;
-            if(Gp[y*(height+1)+x]>0&&Gp[y*(height+1)+x]<=45)
-            {
-                if(i5<=(i6+(i3-i6)*tan(Gp[y*(height+1)+x]))||(i5<=(i4+(i7-i4)*tan(Gp[y*(height+1)+x]))))
-                {
-                    img.setPixelColor(x,y,QColor(0,0,0));
-                }
-            }
-            if(Gp[y*(height+1)+x]>45&&Gp[y*(height+1)+x]<=90)
 
-            {
-                if(i5<=(i2+(i3-i2)/tan(Gp[y*(height+1)+x]))||i5<=(i8+(i7-i8)/tan(Gp[y*(height+1)+x])))
-                {
-                    img.setPixelColor(x,y,QColor(0,0,0));
+//                cout << " | y: " << y << " | (height+1): " << (height+1) << "| y*(height+1): " << y*(height+1) << "| x: " << x << "| y*(height+1)+x: " << y*(height+1)+x << endl;
+                Gp.append(sqrt(pow(Gy[y*(height+1)+x],2)+pow(Gx[y*(height+1)+x],2)));
+//                cout<<Gp[y*(height+1)+x]<<endl;
+                // rotate
+                double x0 = Gx[y*(height+1)+x];
+                double y0 = Gy[y*(height+1)+x];
+                Gx[y*(height+1)+x] = x0 * 0.92387953251 - y0 * 0.38268343236;
 
-                }
-            }
-            if(Gp[y*(height+1)+x]>90&&Gp[y*(height+1)+x]<=135)
-            {
-                if(i5<=(i2+(i1-i2)/tan(180-Gp[y*(height+1)+x]))||i5<=(i8+(i9-i8)/tan(180-Gp[y*(height+1)+x])))
-                {
-                    img.setPixelColor(x,y,QColor(0,0,0));
-                }
-            }
-            if(Gp[y*(height+1)+x]>135&&Gp[y*(height+1)+x]<=180)
-            {
-                if(i5<=(i4+(i1-i4)*tan(180-Gp[y*(height+1)+x]))||i5<=(i6+(i9-i5)*tan(180-Gp[y*(height+1)+x])))
-                {
-                    img.setPixelColor(x,y,QColor(0,0,0));
+                Gy[y*(height+1)+x] = x0 * 0.38268343236 + y0 * 0.92387953251;
+
+                x0 = Gx[y*(height+1)+x];
+                y0 = Gy[y*(height+1)+x];
+                if(x0>=0 && x0>=y0){
+                    Gs.append(0);
+                } else if(x0>=0 && x0<y0){
+                    Gs.append(1);
+                } else if(x0<0 && -x0<y0){
+                    Gs.append(2);
+                } else if(x0<0 && -x0>=y0){
+                    Gs.append(3);
                 }
             }
         }
     }
 
-    for (int y = 1; y < height; y++) {
-        for (int x = 1; x < width; x++) {
-            //召喚
-//            cout << Gp[y*(height+1)+x] << endl;
-            if(Gp[y*(height+1)+x]>highThreshold) {
-                Gp[y*(height+1)+x]=255;
-            } else if(Gp[y*(height+1)+x]<lowThreshold) {
-                Gp[y*(height+1)+x]=0;
+
+
+        cout<<"end of gradient and orientation"<<endl;
+
+//        for(int i=0;i<100000;i++){
+//            cout<<Gp[i]<<endl;
+//        }
+
+        boolean flag = false;
+        for (int y = 1; y <= height-1; y++) {
+            for (int x = 1; x <= width-1; x++) {
+                int mc = Gp[y*(height+1)+x];
+                if(mc < lowThreshold){
+                    flag = false;
+                } else {
+                    double mL,mR;
+                    if(Gs[y*(height+1)+x] == 0){
+                        mL = Gp[(y-1)*(height+1)+(x)];
+                        mR = Gp[(y+1)*(height+1)+(x)];
+                    } else if(Gs[y*(height+1)+x] == 1){
+                        mL = Gp[(y-1)*(height+1)+(x-1)];
+                        mR = Gp[(y+1)*(height+1)+(x+1)];
+                    } else if(Gs[y*(height+1)+x] == 2){
+                        mL = Gp[(y-1)*(height+1)+(x)];
+                        mR = Gp[(y+1)*(height+1)+(x)];
+                    } else if(Gs[y*(height+1)+x] == 3){
+                        mL = Gp[(y+1)*(height+1)+(x-1)];
+                        mR = Gp[(y-1)*(height+1)+(x+1)];
+                    }
+                    flag = ((mL<=mc) && (mc>=mR));
+                }
+                if(flag){
+                    Gnms[y*(height+1)+x] = Gp[y*(height+1)+x];
+                }
             }
-            image -> setPixelColor(x,y,QColor(Gp[y*(height+1)+x],Gp[y*(height+1)+x],Gp[y*(height+1)+x]));
+        }
+
+    cout<<"end of local maxi"<<endl;
+
+    for (int y = 1; y <= height-1; y++) {
+        for (int x = 1; x <= width-1; x++) {
+            if(Gnms[y*(height+1)+x]>=highThreshold && Gbin[y*(height+1)+x] == 0){
+                TraceAndThreshold(Gbin,Gnms,x,y,lowThreshold);
+            }
         }
     }
+    cout<<"end of trace edge"<<endl;
 
-
+    for (int y = 0; y <= height; y++) {
+        for (int x = 0; x <= width; x++) {
+            image->setPixelColor(x,y,QColor(Gbin[y*(height+1)+x],Gbin[y*(height+1)+x],Gbin[y*(height+1)+x]));
+        }
+    }
 
 
     updateImageDisplay();
-        }
+    }
 
     } else {
         alert();
     }
 
 }
+void ImageViewer::TraceAndThreshold(QVector<int> &Gbin, QVector<double> Gnms, int x, int y, int lowThreshold){
+    int height =originImage.height()-1;
+    int width = originImage.width()-1;
+    Gbin[y*(height+1)+x] = 255;
+    int uL,uR,uT,uB;
+    uL = max(x-1,0);
+    uR = min(x+1,width);
+    uT = max(y-1,0);
+    uB = max(x+1,height);
+    for (int u = uL;u<=uR;u++){
+        for(int v = uT;v<=uB;v++){
+            if(Gnms[y*(height+1)+x]>=lowThreshold && Gbin[y*(height+1)+x] == 0 ){
+                TraceAndThreshold(Gbin,Gnms,u,v,lowThreshold);
+            }
+        }
+    }
 
+}
 
 void ImageViewer::button_usm() {
     spinbox_sch_grad->value();
