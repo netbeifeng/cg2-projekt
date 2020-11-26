@@ -1380,9 +1380,103 @@ void ImageViewer::TraceAndThreshold(QVector<int> &Gbin, QVector<double> Gnms, in
 }
 
 void ImageViewer::button_usm() {
-    spinbox_sch_grad->value();
-    spinbox_usm_sigma->value();
-    spinbox_mind_wert->value();
+    if ( image != NULL )
+    {
+    double a = spinbox_sch_grad->value();
+    double tc =spinbox_mind_wert->value();
+    double sigma = spinbox_usm_sigma->value();
+
+    int height =originImage.height();
+    int width = originImage.width();
+    QImage img = originGrayImage.copy();
+    QVector<double> mask;
+    QVector<int> ia;
+
+//int laplace[3][3] = {
+//    {0, 1, 0},
+//    {1, -4, 1},
+//    {0, 1, 0}
+//};
+
+double sum=0.0;
+int center = (int) (3.0 * sigma);
+int size = 2 * center + 1;
+float h[size];
+double sigma2 = sigma * sigma;
+for (int i=0; i< size;i++){
+    double r = center - i;
+    h[i] = (float) exp(-0.5 * (r*r) / sigma2);
+    sum += h[i];
+}
+for (int i=0; i< size;i++){
+    h[i] /= sum;
+}
+for(int i=0+center;i<width-center;i++){
+    for(int j=0+center;j<height-center;j++){
+        float r=0,g=0,b=0;
+        for(int fx=-center;fx<=center;fx++){
+            for(int fy=-center;fy<=center;fy++){
+                QColor oldColor = originGrayImage.pixelColor(i+fx,j+fy);
+                r += oldColor.red()*h[fx+center]*h[fy+center];
+                g += oldColor.green()*h[fx+center]*h[fy+center];
+                b += oldColor.blue()*h[fx+center]*h[fy+center];
+            }
+        }
+        img.setPixelColor(i,j,QColor((int)r,(int)g,(int)b));
+    }
+}
+
+cout<<"end of blur"<<endl;
+
+for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+
+        if(y == 0 || x== 0 || y == (height) || x == (width)) { // “zero - padding”
+            mask.append(originGrayImage.pixelColor(x,y).red());
+        } else {
+            mask.append(originGrayImage.pixelColor(x,y).red()-img.pixelColor(x,y).red());
+        }
+    }
+}
+
+//for (int y = 0; y <= height; y++) {
+//    for (int x = 0; x <= width; x++) {
+//    cout<<mask[y*height+x]<<endl;
+//    }
+//}
+
+for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+        if(y == 0 || x== 0 || y == (height) || x == (width)){
+            ia.append(originGrayImage.pixelColor(x,y).red());
+        }else{
+        int sum = 0;
+        int i2 = (QColor(img.pixel(x,y-1)).red() + QColor(img.pixel(x,y-1)).blue() + QColor(img.pixel(x,y-1)).green())/3;
+        int i4 = (QColor(img.pixel(x-1,y)).blue() + QColor(img.pixel(x-1,y)).green() + QColor(img.pixel(x-1,y)).red())/3;
+        int i5 = (QColor(img.pixel(x,y)).green() + QColor(img.pixel(x,y)).red() + QColor(img.pixel(x,y)).blue())/3;
+        int i6 = (QColor(img.pixel(x+1,y)).blue() + QColor(img.pixel(x+1,y)).red() + QColor(img.pixel(x+1,y)).green())/3;
+        int i8 = (QColor(img.pixel(x,y+1)).blue() + QColor(img.pixel(x,y+1)).green() + QColor(img.pixel(x,y+1)).red())/3;
+        int matrix[4] = {i2,i4,i6,i8};
+        for(int i=0;i<4;i++){
+            sum += pow((matrix[i]-i5),2)/4;
+        }
+            if(abs(sum)>=tc){
+                ia.append(originGrayImage.pixelColor(x,y).red()+a*mask[y*(height)+x]);
+            } else {
+                ia.append(originGrayImage.pixelColor(x,y).red());
+            }
+        }
+    }
+}
+for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+        image->setPixelColor(x,y,QColor(ia[y*height+x],ia[y*height+x],ia[y*height+x]));
+    }
+}
+
+
+updateImageDisplay();
+    }
 }
 
 
