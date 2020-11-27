@@ -1127,33 +1127,100 @@ void ImageViewer::setSliderCEXSizeValue(int newValue) {
 }
 
 void ImageViewer::button_hough() {
-    double PI = 3.14159265358979323846;
-    int n_theta = slider_theta->value();
-    int n_rho = slider_rho->value();
-    int x_c = image->width() /2 ;
-    int y_c = image->height() / 2;
-    double angle = (PI)/n_theta;
+    if(image!=NULL) {
+        double PI = 3.14159265358979323846;
+        unsigned w = image->width();
+        unsigned h = image->height();
 
-    double diagonal = sqrt(pow(x_c,2)+pow(y_c,2));
-    double max = (2*diagonal)/n_rho;
-    int result_array[n_theta][n_rho];
+        unsigned rho_max = unsigned(slider_rho->value());//Hough图像宽：距离rho的量化级数
+        unsigned theta_max = slider_theta->value();   //Hough图像高:角度theta的量化级数
 
-    for(int i = 0; i <image->height(); i++) {
-        for(int j = 0; j <image->width(); j++) {
-            if(image->pixel(j,i) > 0) {
-                int x = j - x_c;
-                int y = i - y_c;
-                for(int a =0; a < n_theta; a++) {
-                    double _theta = angle * a;
-                    int r = (int) round(x*cos(_theta) + y*sin(_theta) / max) + n_rho /2;
-                    if(r >= 0 && r <n_rho) {
-                        result_array[a][r]++;
-                        cout<<result_array[a][r]<<endl;
+        unsigned *arrayHough;//Hough空间数组
+        arrayHough = new unsigned[rho_max * theta_max];
+
+        memset(arrayHough,0,sizeof(unsigned)* rho_max * theta_max);
+
+        BYTE thresh=127;//二值化阈值
+              //将图像二值化后再Hough变换
+              //二值化的内容也在这个循环中完成了。
+              //阈值的选取可以使用更有效的方法。
+
+        DWORD k,m;
+        for(unsigned i = 0 ; i < w; i ++)
+        {
+            for(unsigned j = 0; j < h; j++)
+            {
+                BYTE color = image->pixel(i,j);
+                if(color > thresh)
+                {
+                    for(k = 0 ; k < theta_max ; k++)
+                        //角度取值范围 -pi/4 - 3*pi/4
+                    {
+                        double angle= k * (PI) /theta_max - PI/4;
+                        unsigned rho = unsigned(fabs(i * cos(angle)+ j * sin(angle)));
+                        arrayHough[theta_max * rho + k] ++;
+//                        cout << arrayHough[theta_max * rho + k] << endl;
                     }
                 }
             }
         }
+//        QImage *image1 = new QImage(256, 256, QImage::Format_RGB32);
+
+
+        QImage _image(rho_max,theta_max,QImage::Format_RGB16);
+        unsigned nMaxHough=0;//Hough图像最大值
+        for( k = 0 ; k < rho_max ; k++)
+        {
+            for( m = 0 ; m < theta_max ; m++)
+            {
+                nMaxHough = max(nMaxHough,arrayHough[theta_max * k + m]);
+            }
+        }
+        if(nMaxHough == 0 ) nMaxHough =1;
+        for( k = 0 ; k < rho_max ; k++)
+        {
+            for( m = 0 ; m < theta_max ; m++)
+            {
+                int color = arrayHough[theta_max * k + m]*255/nMaxHough;
+//                cout << arrayHough[theta_max * k + m]*255/nMaxHough << endl;
+                _image.setPixelColor(k,m,QColor(color,color,color));
+            }
+        }
+        imageLabel->setPixmap( QPixmap() );
+        imageLabel->adjustSize();
+        imageLabel->setPixmap( QPixmap::fromImage( _image ) );
+        imageLabel->adjustSize();
+    } else {
+        alert();
     }
+
+
+//    int n_theta = slider_theta->value();
+//    int n_rho = slider_rho->value();
+//    int x_c = image->width() /2 ;
+//    int y_c = image->height() / 2;
+//    double angle = (PI)/n_theta;
+
+//    double diagonal = sqrt(pow(x_c,2)+pow(y_c,2));
+//    double max = (2*diagonal)/n_rho;
+//    int result_array[n_theta][n_rho];
+
+//    for(int i = 0; i <image->height(); i++) {
+//        for(int j = 0; j <image->width(); j++) {
+//            if(image->pixel(j,i) > 0) {
+//                int x = j - x_c;
+//                int y = i - y_c;
+//                for(int a = 0; a < n_theta; a++) {
+//                    double _theta = angle * a;
+//                    int r = (int) round(x*cos(_theta) + y*sin(_theta) / max) + n_rho /2;
+//                    if(r >= 0 && r <n_rho) {
+//                        result_array[a][r]++;
+//                        cout<<result_array[a][r]<<endl;
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
 void ImageViewer::button_canny() {
@@ -1883,7 +1950,7 @@ void ImageViewer::generateControlPanels()
     QVBoxLayout	* v_rho	= new QVBoxLayout();
 
     QHBoxLayout	* h_theta	= new QHBoxLayout();
-    QLabel		* label_theta	= new QLabel( "t<sub>high</sub>:" );
+    QLabel		* label_theta	= new QLabel( "Theta θ:" );
     label_theta->setFont( ft );
     h_theta->addWidget( label_theta );
     label_theta_t = new QLabel( QString::number( theta ) );
@@ -1891,7 +1958,7 @@ void ImageViewer::generateControlPanels()
     h_theta->addWidget( label_theta_t );
 
     QHBoxLayout	* h_rho	= new QHBoxLayout();
-    QLabel		* label_rho	= new QLabel( "t<sub>low</sub>:" );
+    QLabel		* label_rho	= new QLabel( "Rho ρ:" );
 
     label_rho->setFont( ft );
     h_rho->addWidget( label_rho );
@@ -1902,15 +1969,15 @@ void ImageViewer::generateControlPanels()
     slider_theta = new QSlider( Qt::Horizontal );
     slider_theta->setValue( 1 );
 
-    slider_theta->setTickInterval( 1 );
-    slider_theta->setRange( 1, 255 );
+    slider_theta->setTickInterval( 5 );
+    slider_theta->setRange( 1, 360 );
     slider_theta->setTickPosition( QSlider::TicksBothSides );
     QObject::connect( slider_theta, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderTheta( int ) ) );
 
     slider_rho = new QSlider( Qt::Horizontal );
     slider_rho->setValue( 1 );
-    slider_rho->setTickInterval( 1 );
-    slider_rho->setRange( 1, 255 );
+    slider_rho->setTickInterval( 10 );
+//    slider_rho->setRange( 1, 6 );
     slider_rho->setTickPosition( QSlider::TicksBothSides );
     QObject::connect( slider_rho, SIGNAL( valueChanged( int ) ), this, SLOT( setSliderRho( int ) ) );
 
@@ -2055,6 +2122,7 @@ bool ImageViewer::loadFile( const QString &fileName )
         }
     }
     QImage grayImage = image->convertToFormat( QImage::Format_Grayscale8 );
+    slider_rho->setRange(1, sqrt(image->width()*image->width() + image->height()*image->height()));
     for ( int i = 0; i < grayImage.height(); i++ )
     {
         for ( int j = 0; j < grayImage.width(); j++ )
