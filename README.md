@@ -15,9 +15,6 @@ Bearbeiter:
 - Aufgabe 6 (bei canny edge haben wir sobel benutzt deshalb wird es vielleicht ein bisschen anderes wie die andere Mitstudenten gamacht/Ihre Musterloesung gezeigt werden)
 - Aufgabe 7 ( nur a) und b) )
 
-## Icon
-![Icon_Lena](./lenna.ico)
-
 ## Test-Image
 ![Lena](./lenna.jpg)
 
