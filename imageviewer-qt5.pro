@@ -6,12 +6,7 @@ HEADERS       = imageviewer-qt5.h \
 SOURCES       = imageviewer-qt5.cpp \
                 imageviewer-main-qt5.cpp \
                 qcustomplot.cpp
-RESOURCES     = CG2_Uebung_01.pdf \
-                CG2_Uebung_02.pdf \
-                CG2_Uebung_03.pdf \
-                CG2_Uebung_04.pdf \
-                CG2_Uebung_05.pdf \
-                lenna.ico \
+RESOURCES     = lenna.ico \
                 lenna.jpg \
                 README.md
 # install

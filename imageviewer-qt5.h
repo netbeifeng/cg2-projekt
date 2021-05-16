@@ -123,6 +123,7 @@ class ImageViewer : public QMainWindow
 
      QSlider* slider_theta;
      QSlider* slider_rho;
+     QSlider* slider_ts;
 
      QLabel* label_contrast_value;
      QLabel* label_brightness_value;
@@ -155,6 +156,7 @@ class ImageViewer : public QMainWindow
 
      void setSliderTheta(int);
      void setSliderRho(int);
+     void setSliderTS(int);
      // hier können weitere als SLOTS definierte Funktionen hin, die auf Knopfdruck etc. aufgerufen werden.
 
 
@@ -226,6 +228,7 @@ protected:
 
     QLabel* label_theta_t;
     QLabel* label_rho_r;
+    QLabel* label_ts_t;
 
     QScrollArea* scrollArea;
     double scaleFactor;
