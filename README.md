@@ -1,8 +1,8 @@
 # cg2-projekt
 ### **DEADLINE: 2020.11.27**
 Bearbeiter: 
-- Chang Luo 
-- Bozhen Zhu 
+- [Chang Luo](mailto:chang.luo@stud.hs-hannover.de) 
+- [Bozhen Zhu](mailto:bozhen.zhu@stud.hs-hannover.de) 
 
 
 
